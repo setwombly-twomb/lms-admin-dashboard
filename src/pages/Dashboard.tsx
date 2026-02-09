@@ -101,7 +101,64 @@ export default function Dashboard() {
         <p className="text-base text-gray-600">Manage users, content, and view analytics</p>
       </div>
 
-      {/* Top Stats Cards */}
+      {/* Quick Action Cards */}
+      <div className="flex flex-wrap gap-4 mb-6">
+        {/* User Management */}
+        <div className="rounded-lg border border-blue-100 bg-gradient-to-br from-blue-50/60 to-white p-3 w-full md:w-[380px]">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center">
+              <UserOutlined className="text-blue-600 text-xs" />
+            </div>
+            <h3 className="text-sm font-semibold text-gray-900">User Management</h3>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {userFlows.map((flow) => {
+              const Icon = flow.icon;
+              return (
+                <button
+                  key={flow.title}
+                  onClick={() => handleFlowClick(flow)}
+                  className="flex flex-col items-center justify-center gap-1.5 p-2.5 h-[88px] bg-white rounded-lg border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all group text-center"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+                    <Icon className="text-blue-600 text-sm" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-700 group-hover:text-gray-900 leading-tight">{flow.title}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Content Management */}
+        <div className="rounded-lg border border-purple-100 bg-gradient-to-br from-purple-50/60 to-white p-3 w-full md:w-[380px]">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-6 rounded bg-purple-100 flex items-center justify-center">
+              <FolderOpenOutlined className="text-purple-600 text-xs" />
+            </div>
+            <h3 className="text-sm font-semibold text-gray-900">Content Management</h3>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {contentFlows.map((flow) => {
+              const Icon = flow.icon;
+              return (
+                <button
+                  key={flow.title}
+                  onClick={() => handleFlowClick(flow)}
+                  className="flex flex-col items-center justify-center gap-1.5 p-2.5 h-[88px] bg-white rounded-lg border border-gray-200 hover:border-purple-200 hover:shadow-md transition-all group text-center"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-purple-50 group-hover:bg-purple-100 flex items-center justify-center transition-colors">
+                    <Icon className="text-purple-600 text-sm" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-700 group-hover:text-gray-900 leading-tight">{flow.title}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
         <button onClick={() => navigate('/users')} className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
           <div className="flex items-center justify-between">
@@ -139,63 +196,6 @@ export default function Dashboard() {
             </div>
           </div>
         </button>
-      </div>
-
-      {/* Quick Action Cards */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        {/* User Management */}
-        <div className="rounded-lg border border-blue-100 bg-gradient-to-br from-blue-50/60 to-white p-3 w-full md:w-auto md:min-w-[320px] md:max-w-[380px]">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center">
-              <UserOutlined className="text-blue-600 text-xs" />
-            </div>
-            <h3 className="text-sm font-semibold text-gray-900">User Management</h3>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {userFlows.map((flow) => {
-              const Icon = flow.icon;
-              return (
-                <button
-                  key={flow.title}
-                  onClick={() => handleFlowClick(flow)}
-                  className="flex flex-col items-center gap-1.5 p-2.5 bg-white rounded-lg border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all group text-center"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
-                    <Icon className="text-blue-600 text-sm" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-700 group-hover:text-gray-900 leading-tight">{flow.title}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Content Management */}
-        <div className="rounded-lg border border-purple-100 bg-gradient-to-br from-purple-50/60 to-white p-3 w-full md:w-auto md:min-w-[320px] md:max-w-[380px]">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded bg-purple-100 flex items-center justify-center">
-              <FolderOpenOutlined className="text-purple-600 text-xs" />
-            </div>
-            <h3 className="text-sm font-semibold text-gray-900">Content Management</h3>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {contentFlows.map((flow) => {
-              const Icon = flow.icon;
-              return (
-                <button
-                  key={flow.title}
-                  onClick={() => handleFlowClick(flow)}
-                  className="flex flex-col items-center gap-1.5 p-2.5 bg-white rounded-lg border border-gray-200 hover:border-purple-200 hover:shadow-md transition-all group text-center"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-purple-50 group-hover:bg-purple-100 flex items-center justify-center transition-colors">
-                    <Icon className="text-purple-600 text-sm" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-700 group-hover:text-gray-900 leading-tight">{flow.title}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
       </div>
 
       {/* Analytics — Full Width */}
