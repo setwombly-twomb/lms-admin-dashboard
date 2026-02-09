@@ -241,7 +241,6 @@ export default function AppLayout() {
               </div>
             </div>
           </div>
-          </div>
         )}
 
         {/* Page content */}
