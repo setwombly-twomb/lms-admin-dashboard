@@ -16,6 +16,7 @@ import {
 } from '@ant-design/icons';
 import { Tooltip, Badge } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import Breadcrumbs from './Breadcrumbs';
 
 interface Notification {
   id: string;
@@ -163,8 +164,8 @@ export default function AppLayout() {
             </button>
             <h1 className="text-xl font-semibold text-gray-900">Admin Dashboard</h1>
 
-            {/* Bell icon + preview + dropdown */}
-            <div className="relative ml-auto flex items-center gap-3" ref={notifRef}>
+            {/* Bell icon + preview */}
+            <div className="ml-auto flex items-center gap-3" ref={notifRef}>
               {/* Latest notification preview */}
               {notifications.length > 0 && !notifOpen && (
                 <button
@@ -184,63 +185,68 @@ export default function AppLayout() {
                   <BellOutlined className="text-gray-600 text-lg" />
                 </button>
               </Badge>
-
-              {notifOpen && (
-                <div className="absolute right-0 mt-2 w-96 bg-white border border-gray-200 rounded-xl shadow-xl z-50">
-                  <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-900">Notifications</span>
-                    {notifications.length > 0 && (
-                      <button
-                        onClick={() => setNotifications([])}
-                        className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        Dismiss all
-                      </button>
-                    )}
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <div className="px-4 py-8 text-center text-sm text-gray-400">All caught up!</div>
-                    ) : (
-                      notifications.map((n) => (
-                        <div
-                          key={n.id}
-                          className={`border-l-4 px-4 py-3 border-b border-gray-50 ${notifColors[n.type]} transition-all`}
-                        >
-                          <div className="flex items-start gap-2.5">
-                            <div className="mt-0.5">{notifIcons[n.type]}</div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900">{n.message}</p>
-                              <p className="text-xs text-gray-500 mt-0.5">{n.detail}</p>
-                              <div className="flex items-center gap-3 mt-2">
-                                <button
-                                  onClick={() => { navigate(n.actionPath); setNotifOpen(false); }}
-                                  className="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
-                                >
-                                  {n.actionLabel} <RightOutlined className="text-[10px]" />
-                                </button>
-                                <button
-                                  onClick={() => dismissNotification(n.id)}
-                                  className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
-                                >
-                                  <CheckOutlined className="text-[10px]" /> Dismiss
-                                </button>
-                                <span className="text-xs text-gray-400 ml-auto">{n.time}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
 
+        {/* Notifications dropdown — floats below header */}
+        {notifOpen && (
+          <div className="relative">
+            <div className="absolute right-6 top-0 z-50 w-96 bg-white border border-gray-200 rounded-b-xl shadow-xl">
+              <div className="px-6 py-3 border-b border-gray-100 flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-900">Notifications</span>
+                {notifications.length > 0 && (
+                  <button
+                    onClick={() => setNotifications([])}
+                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    Dismiss all
+                  </button>
+                )}
+              </div>
+              <div className="max-h-80 overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <div className="px-6 py-8 text-center text-sm text-gray-400">All caught up!</div>
+                ) : (
+                  notifications.map((n) => (
+                    <div
+                      key={n.id}
+                      className={`border-l-4 px-6 py-3 border-b border-gray-50 ${notifColors[n.type]} transition-all`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <div className="mt-0.5">{notifIcons[n.type]}</div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900">{n.message}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{n.detail}</p>
+                          <div className="flex items-center gap-3 mt-2">
+                            <button
+                              onClick={() => { navigate(n.actionPath); setNotifOpen(false); }}
+                              className="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
+                            >
+                              {n.actionLabel} <RightOutlined className="text-[10px]" />
+                            </button>
+                            <button
+                              onClick={() => dismissNotification(n.id)}
+                              className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
+                            >
+                              <CheckOutlined className="text-[10px]" /> Dismiss
+                            </button>
+                            <span className="text-xs text-gray-400 ml-auto">{n.time}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+          </div>
+        )}
+
         {/* Page content */}
         <div className="flex-1 overflow-auto px-6 py-6">
+          <Breadcrumbs />
           <Outlet />
         </div>
       </div>
