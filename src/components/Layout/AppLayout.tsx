@@ -321,7 +321,7 @@ export default function AppLayout() {
             >
               <MenuOutlined className="text-gray-600" />
             </button>
-            <h1 className="text-xl font-semibold text-gray-900 flex-shrink-0">Ethos Systems Dashboard</h1>
+            <h1 className="text-xl font-semibold text-gray-900 flex-shrink-0">Ethos Dashboard</h1>
 
             {/* Global Search — inline bar */}
             {!searchFocused && (
