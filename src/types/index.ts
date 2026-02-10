@@ -45,6 +45,7 @@ export interface QuizMetric {
   attempts: number;
   avgScore: number;
   passRate: number;
+  userIds: string[];
 }
 
 export interface LessonMetric {
@@ -54,6 +55,7 @@ export interface LessonMetric {
   views: number;
   completionRate: number;
   avgTimeMinutes: number;
+  userIds: string[];
 }
 
 export interface KpiData {

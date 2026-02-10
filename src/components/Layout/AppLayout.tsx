@@ -152,7 +152,6 @@ export default function AppLayout() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchHighlight, setSearchHighlight] = useState(0);
-  const [notifScrolled, setNotifScrolled] = useState(false);
   const [recentSearches, setRecentSearches] = useState<SearchItem[]>([
     searchIndex[13], // Advanced JavaScript (course)
     searchIndex[22], // John Smith (user)
@@ -161,7 +160,6 @@ export default function AppLayout() {
     searchIndex[19], // React Hooks Assessment (quiz)
   ]);
   const notifRef = useRef<HTMLDivElement>(null);
-  const notifScrollRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -186,10 +184,6 @@ export default function AppLayout() {
     }
     return groups;
   }, [searchResults]);
-
-  const dismissNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -347,9 +341,8 @@ export default function AppLayout() {
               </div>
             )}
 
-            {/* Bell icon + preview */}
+            {/* Notification bell + preview pill */}
             <div className="ml-auto flex items-center gap-3" ref={notifRef}>
-              {/* Latest notification preview */}
               {notifications.length > 0 && !notifOpen && (
                 <button
                   onClick={() => setNotifOpen(true)}
@@ -357,17 +350,25 @@ export default function AppLayout() {
                 >
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center relative">
                     <BellOutlined className="text-xs" style={{ color: 'white' }} />
-                    {notifications.length > 0 && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                        {notifications.length}
-                      </span>
-                    )}
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {notifications.length}
+                    </span>
                   </span>
                   <span className="text-sm font-medium text-white truncate">{notifications[0].message}</span>
                   <span className="text-xs text-gray-600 flex-shrink-0 font-bold">{notifications[0].time}</span>
                   <RightOutlined className="text-[10px] flex-shrink-0 font-extrabold" style={{ color: '#4b5563' }} />
                 </button>
               )}
+              {/* Mobile bell icon */}
+              <button
+                onClick={() => setNotifOpen(true)}
+                className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors relative"
+              >
+                <BellOutlined className="text-gray-600 text-lg" />
+                {notifications.length > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -513,7 +514,7 @@ export default function AppLayout() {
           </div>
         )}
 
-        {/* Notifications slide-in overlay */}
+        {/* Action Items modal */}
         {notifOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setNotifOpen(false)} />
@@ -524,7 +525,7 @@ export default function AppLayout() {
                     <BellOutlined className="text-gray-600" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-gray-900">Notifications</h3>
+                    <h3 className="text-base font-semibold text-gray-900">Action Items</h3>
                     <p className="text-xs text-gray-500">{notifications.length} pending</p>
                   </div>
                 </div>
@@ -545,68 +546,47 @@ export default function AppLayout() {
                   </button>
                 </div>
               </div>
-              <div className="relative">
-                <div 
-                  ref={notifScrollRef}
-                  className="h-[580px] overflow-y-auto scrollbar-thin"
-                  onScroll={(e) => {
-                    const target = e.currentTarget;
-                    setNotifScrolled(target.scrollTop > 10);
-                  }}
-                >
-                  {notifications.length === 0 ? (
-                    <div className="px-6 py-12 text-center">
-                      <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
-                        <CheckOutlined className="text-green-500 text-lg" />
-                      </div>
-                      <p className="text-sm font-medium text-gray-900">All caught up!</p>
-                      <p className="text-xs text-gray-500 mt-1">No pending notifications</p>
+              <div className="max-h-[70vh] overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <div className="px-6 py-12 text-center">
+                    <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
+                      <CheckOutlined className="text-green-500 text-lg" />
                     </div>
-                  ) : (
-                    notifications.map((n) => (
-                      <div
-                        key={n.id}
-                        className={`border-l-4 px-6 py-4 border-b border-gray-50 ${notifColors[n.type]} transition-all hover:brightness-95`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">
-                            {notifIcons[n.type]}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900">{n.message}</p>
-                            <p className="text-xs text-gray-500 mt-1 leading-relaxed">{n.detail}</p>
-                            <div className="flex items-center gap-3 mt-3">
-                              <button
-                                onClick={() => { navigate(n.actionPath); setNotifOpen(false); }}
-                                className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
-                              >
-                                {n.actionLabel} <RightOutlined className="text-[10px]" />
-                              </button>
-                              <button
-                                onClick={() => dismissNotification(n.id)}
-                                className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded-full transition-colors"
-                              >
-                                <CheckOutlined className="text-[10px]" /> Dismiss
-                              </button>
-                              <span className="text-xs text-gray-400 ml-auto">{n.time}</span>
-                            </div>
+                    <p className="text-sm font-medium text-gray-900">All caught up!</p>
+                    <p className="text-xs text-gray-500 mt-1">No pending action items</p>
+                  </div>
+                ) : (
+                  notifications.map((n) => (
+                    <div
+                      key={n.id}
+                      className={`border-l-4 px-6 py-4 border-b border-gray-50 ${notifColors[n.type]} transition-all hover:brightness-95`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                          {notifIcons[n.type]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-900">{n.message}</p>
+                          <p className="text-xs text-gray-500 mt-1 leading-relaxed">{n.detail}</p>
+                          <div className="flex items-center gap-3 mt-3">
+                            <button
+                              onClick={() => { navigate(n.actionPath); setNotifOpen(false); }}
+                              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
+                            >
+                              {n.actionLabel} <RightOutlined className="text-[10px]" />
+                            </button>
+                            <button
+                              onClick={() => setNotifications((prev) => prev.filter((x) => x.id !== n.id))}
+                              className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                              <CheckOutlined className="text-[10px]" /> Dismiss
+                            </button>
+                            <span className="text-xs text-gray-400 ml-auto">{n.time}</span>
                           </div>
                         </div>
                       </div>
-                    ))
-                  )}
-                </div>
-                {/* Scroll indicator */}
-                {notifications.length > 5 && !notifScrolled && (
-                  <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none flex items-end justify-center pb-4">
-                    <div className="px-4 py-2 bg-blue-600 text-white rounded-full shadow-lg flex items-center gap-2 animate-bounce">
-                      <BellOutlined className="text-sm" />
-                      <span className="text-sm font-semibold">{notifications.length} notifications</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                      </svg>
                     </div>
-                  </div>
+                  ))
                 )}
               </div>
             </div>

@@ -1,5 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Select } from 'antd';
+import { mockUsers } from '../data/users';
+import { mockGroups } from '../data/groups';
+import { mockAttributes } from '../data/attributes';
 import {
   UserAddOutlined,
   TeamOutlined,
@@ -24,6 +28,7 @@ import {
   QuestionCircleOutlined,
   LeftOutlined,
   TagOutlined,
+  FilterOutlined,
 } from '@ant-design/icons';
 
 interface FlowItem {
@@ -46,42 +51,49 @@ const contentFlows: FlowItem[] = [
   { title: 'Export Data', icon: DownloadOutlined, path: '/export' },
 ];
 
-const quizStats = [
-  { label: 'Completions', value: '1,247', change: '+12%', path: '/analytics/quizzes/completions' },
-  { label: 'Avg Score', value: '84.5%', change: '+3.2%', path: '/analytics/quizzes/scores' },
-  { label: 'Pass Rate', value: '91.2%', change: '+5.1%', path: '/analytics/quizzes/pass-rate' },
-];
 
-const lessonStats = [
-  { label: 'In Progress', value: '892', change: '+18%', path: '/analytics/lessons/in-progress' },
-  { label: 'Completed', value: '156', change: '+24', path: '/analytics/lessons/completed' },
-  { label: 'Avg Progress', value: '67.3%', change: '+4.5%', path: '/analytics/lessons/progress' },
-];
+const selectAttributes = mockAttributes.filter((a) => a.type === 'Select' && a.appliedTo === 'User');
+
+const attributeUserMap: Record<string, Record<string, string[]>> = {
+  Department: {
+    Engineering: ['1', '2', '5', '8', '12'],
+    Marketing: ['3', '6', '11'],
+    Sales: ['4', '6', '10'],
+    Design: ['5', '7'],
+    HR: ['9'],
+  },
+  'Skill Level': {
+    Beginner: ['4', '8', '10'],
+    Intermediate: ['3', '6', '7', '11'],
+    Advanced: ['1', '2', '5', '12'],
+    Expert: ['9'],
+  },
+};
 
 const recentQuizzes = [
-  { id: 'rq1', title: 'JavaScript Fundamentals Quiz', user: 'Emily Chen', score: '92%', time: '1h ago' },
-  { id: 'rq2', title: 'React Hooks Assessment', user: 'David Wilson', score: '88%', time: '2h ago' },
-  { id: 'rq3', title: 'CSS Grid & Flexbox Quiz', user: 'Lisa Anderson', score: '95%', time: '3h ago' },
-  { id: 'rq4', title: 'TypeScript Basics Quiz', user: 'Mike Davis', score: '76%', time: '4h ago' },
-  { id: 'rq5', title: 'Node.js Essentials', user: 'Sarah Johnson', score: '84%', time: '5h ago' },
-  { id: 'rq6', title: 'React Hooks Assessment', user: 'John Smith', score: '91%', time: '6h ago' },
-  { id: 'rq7', title: 'Git & Version Control Quiz', user: 'Amy Rodriguez', score: '97%', time: '7h ago' },
-  { id: 'rq8', title: 'REST API Design Quiz', user: 'Chris Lee', score: '73%', time: '8h ago' },
-  { id: 'rq9', title: 'JavaScript Fundamentals Quiz', user: 'Rachel Kim', score: '89%', time: '9h ago' },
-  { id: 'rq10', title: 'CSS Grid & Flexbox Quiz', user: 'Tom Martinez', score: '82%', time: '10h ago' },
+  { id: 'rq1', title: 'JavaScript Fundamentals Quiz', user: 'Emily Chen', score: '92%', scoreNum: 92, time: '1h ago', userId: '5' },
+  { id: 'rq2', title: 'React Hooks Assessment', user: 'David Wilson', score: '88%', scoreNum: 88, time: '2h ago', userId: '4' },
+  { id: 'rq3', title: 'CSS Grid & Flexbox Quiz', user: 'Lisa Anderson', score: '95%', scoreNum: 95, time: '3h ago', userId: '11' },
+  { id: 'rq4', title: 'TypeScript Basics Quiz', user: 'Mike Davis', score: '76%', scoreNum: 76, time: '4h ago', userId: '8' },
+  { id: 'rq5', title: 'Node.js Essentials', user: 'Sarah Johnson', score: '84%', scoreNum: 84, time: '5h ago', userId: '1' },
+  { id: 'rq6', title: 'React Hooks Assessment', user: 'John Smith', score: '91%', scoreNum: 91, time: '6h ago', userId: '2' },
+  { id: 'rq7', title: 'Git & Version Control Quiz', user: 'Amy Rodriguez', score: '97%', scoreNum: 97, time: '7h ago', userId: '7' },
+  { id: 'rq8', title: 'REST API Design Quiz', user: 'Chris Lee', score: '73%', scoreNum: 73, time: '8h ago', userId: '6' },
+  { id: 'rq9', title: 'JavaScript Fundamentals Quiz', user: 'Rachel Kim', score: '89%', scoreNum: 89, time: '9h ago', userId: '3' },
+  { id: 'rq10', title: 'CSS Grid & Flexbox Quiz', user: 'Tom Martinez', score: '82%', scoreNum: 82, time: '10h ago', userId: '12' },
 ];
 
 const recentLessons = [
-  { title: 'Introduction to React', user: 'John Smith', time: '1h ago' },
-  { title: 'Advanced JavaScript', user: 'Sarah Johnson', time: '2h ago' },
-  { title: 'CSS Fundamentals', user: 'Mike Davis', time: '3h ago' },
-  { title: 'State Management with Redux', user: 'Emily Chen', time: '4h ago' },
-  { title: 'Building REST APIs', user: 'David Wilson', time: '5h ago' },
-  { title: 'TypeScript for Beginners', user: 'Lisa Anderson', time: '6h ago' },
-  { title: 'Responsive Web Design', user: 'Amy Rodriguez', time: '7h ago' },
-  { title: 'Git Workflow Best Practices', user: 'Chris Lee', time: '8h ago' },
-  { title: 'Testing with Jest', user: 'Rachel Kim', time: '9h ago' },
-  { title: 'Docker Fundamentals', user: 'Tom Martinez', time: '10h ago' },
+  { id: 'rl1', title: 'Introduction to React', user: 'John Smith', time: '1h ago', userId: '2', progress: 100 },
+  { id: 'rl2', title: 'Advanced JavaScript', user: 'Sarah Johnson', time: '2h ago', userId: '1', progress: 100 },
+  { id: 'rl3', title: 'CSS Fundamentals', user: 'Mike Davis', time: '3h ago', userId: '8', progress: 45 },
+  { id: 'rl4', title: 'State Management with Redux', user: 'Emily Chen', time: '4h ago', userId: '5', progress: 72 },
+  { id: 'rl5', title: 'Building REST APIs', user: 'David Wilson', time: '5h ago', userId: '4', progress: 38 },
+  { id: 'rl6', title: 'TypeScript for Beginners', user: 'Lisa Anderson', time: '6h ago', userId: '11', progress: 100 },
+  { id: 'rl7', title: 'Responsive Web Design', user: 'Amy Rodriguez', time: '7h ago', userId: '7', progress: 55 },
+  { id: 'rl8', title: 'Git Workflow Best Practices', user: 'Chris Lee', time: '8h ago', userId: '6', progress: 100 },
+  { id: 'rl9', title: 'Testing with Jest', user: 'Rachel Kim', time: '9h ago', userId: '3', progress: 80 },
+  { id: 'rl10', title: 'Docker Fundamentals', user: 'Tom Martinez', time: '10h ago', userId: '12', progress: 100 },
 ];
 
 const timePeriods = ['Today', 'Yesterday', 'Last 7 days', 'Last 14 days', 'Last 30 days'];
@@ -193,7 +205,83 @@ export default function Dashboard() {
   const [assigneeSearch, setAssigneeSearch] = useState('');
   const [contentTypeFilter, setContentTypeFilter] = useState<ContentType | 'all'>('all');
   const [assigneeTypeFilter, setAssigneeTypeFilter] = useState<AssigneeType | 'all'>('all');
+  const [analyticsGroup, setAnalyticsGroup] = useState<string | undefined>();
+  const [analyticsUsers, setAnalyticsUsers] = useState<string[]>([]);
+  const [analyticsAttrName, setAnalyticsAttrName] = useState<string | undefined>();
+  const [analyticsAttrValue, setAnalyticsAttrValue] = useState<string | undefined>();
+  const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
+
+  const selectedAttr = selectAttributes.find((a) => a.name === analyticsAttrName);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (analyticsAttrName && analyticsAttrValue) count++;
+    if (analyticsGroup) count++;
+    if (analyticsUsers.length > 0) count++;
+    return count;
+  }, [analyticsAttrName, analyticsAttrValue, analyticsGroup, analyticsUsers]);
+
+  const clearAllFilters = () => {
+    setAnalyticsAttrName(undefined);
+    setAnalyticsAttrValue(undefined);
+    setAnalyticsGroup(undefined);
+    setAnalyticsUsers([]);
+  };
+
+  const filteredUserIds = useMemo(() => {
+    let ids: Set<string> | null = null;
+
+    if (analyticsGroup) {
+      const group = mockGroups.find((g) => g.name === analyticsGroup);
+      if (group) ids = new Set(group.members);
+    }
+
+    if (analyticsAttrName && analyticsAttrValue) {
+      const attrIds = new Set(attributeUserMap[analyticsAttrName]?.[analyticsAttrValue] ?? []);
+      ids = ids ? new Set([...ids].filter((id) => attrIds.has(id))) : attrIds;
+    }
+
+    if (analyticsUsers.length > 0) {
+      const userSet = new Set(analyticsUsers);
+      ids = ids ? new Set([...ids].filter((id) => userSet.has(id))) : userSet;
+    }
+
+    return ids;
+  }, [analyticsGroup, analyticsAttrName, analyticsAttrValue, analyticsUsers]);
+
+  const filteredQuizzes = useMemo(() => {
+    if (!filteredUserIds) return recentQuizzes;
+    return recentQuizzes.filter((q) => filteredUserIds.has(q.userId));
+  }, [filteredUserIds]);
+
+  const filteredLessons = useMemo(() => {
+    if (!filteredUserIds) return recentLessons;
+    return recentLessons.filter((l) => filteredUserIds.has(l.userId));
+  }, [filteredUserIds]);
+
+  const computedQuizStats = useMemo(() => {
+    const count = filteredQuizzes.length;
+    const avg = count ? (filteredQuizzes.reduce((s, q) => s + q.scoreNum, 0) / count).toFixed(1) : '0';
+    const passing = count ? filteredQuizzes.filter((q) => q.scoreNum >= 70).length : 0;
+    const passRate = count ? ((passing / count) * 100).toFixed(1) : '0';
+    return [
+      { label: 'Completions', value: count.toLocaleString(), change: '+12%', path: '/analytics/quizzes/completions' },
+      { label: 'Avg Score', value: `${avg}%`, change: '+3.2%', path: '/analytics/quizzes/scores' },
+      { label: 'Pass Rate', value: `${passRate}%`, change: '+5.1%', path: '/analytics/quizzes/pass-rate' },
+    ];
+  }, [filteredQuizzes]);
+
+  const computedLessonStats = useMemo(() => {
+    const inProgress = filteredLessons.filter((l) => l.progress < 100).length;
+    const completed = filteredLessons.filter((l) => l.progress >= 100).length;
+    const avgProgress = filteredLessons.length ? (filteredLessons.reduce((s, l) => s + l.progress, 0) / filteredLessons.length).toFixed(1) : '0';
+    return [
+      { label: 'In Progress', value: String(inProgress), change: '+18%', path: '/analytics/lessons/in-progress' },
+      { label: 'Completed', value: String(completed), change: '+24', path: '/analytics/lessons/completed' },
+      { label: 'Avg Progress', value: `${avgProgress}%`, change: '+4.5%', path: '/analytics/lessons/progress' },
+    ];
+  }, [filteredLessons]);
 
   const resetAssign = () => {
     setAssignOpen(false);
@@ -243,15 +331,15 @@ export default function Dashboard() {
   return (
     <div>
       {/* Hero */}
-      <div className="mb-6">
-        <h2 className="text-3xl font-semibold text-gray-900 mb-2">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-3xl font-semibold text-gray-900 mb-1 sm:mb-2">
           Let's get started, what would you like to do?
         </h2>
-        <p className="text-base text-gray-600">Manage users, content, and view analytics</p>
+        <p className="text-sm sm:text-base text-gray-600">Manage users, content, and view analytics</p>
       </div>
 
       {/* Quick Action Cards */}
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-6">
         {/* User Management */}
         <div className="rounded-lg border border-blue-100 bg-gradient-to-br from-blue-50/60 to-white p-3 w-full md:w-[500px]">
           <div className="flex items-center gap-2 mb-3">
@@ -260,7 +348,7 @@ export default function Dashboard() {
             </div>
             <h3 className="text-sm font-semibold text-gray-900">User Management</h3>
           </div>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {userFlows.map((flow) => {
               const Icon = flow.icon;
               return (
@@ -307,89 +395,186 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-        <button onClick={() => navigate('/analytics/total-users')} className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-blue-700 mb-0.5">Active Users</p>
-              <p className="text-2xl font-semibold text-gray-900">2,847</p>
-              <p className="text-xs text-blue-600 font-medium mt-0.5">+127 this month</p>
-            </div>
-            <div className="bg-blue-100 p-2.5 rounded-lg">
-              <UserOutlined className="text-blue-600 text-lg" />
-            </div>
-          </div>
-        </button>
-        <button onClick={() => navigate('/analytics/active-content')} className="bg-gradient-to-br from-purple-50 to-white rounded-lg border border-purple-100 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-purple-700 mb-0.5">Active Content</p>
-              <p className="text-2xl font-semibold text-gray-900">162</p>
-              <p className="text-xs text-purple-600 font-medium mt-0.5">+8 this month</p>
-            </div>
-            <div className="bg-purple-100 p-2.5 rounded-lg">
-              <FolderOpenOutlined className="text-purple-600 text-lg" />
-            </div>
-          </div>
-        </button>
-        <button onClick={() => navigate('/analytics/completion-rate')} className="bg-gradient-to-br from-amber-50 to-white rounded-lg border border-amber-100 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-amber-700 mb-0.5">Completion Rate</p>
-              <p className="text-2xl font-semibold text-gray-900">78.4%</p>
-              <p className="text-xs text-amber-600 font-medium mt-0.5">+2.3% this week</p>
-            </div>
-            <div className="bg-amber-100 p-2.5 rounded-lg">
-              <RiseOutlined className="text-amber-600 text-lg" />
-            </div>
-          </div>
-        </button>
-      </div>
-
       {/* Analytics — Full Width */}
-      <div className="bg-gradient-to-br from-emerald-50 to-white rounded-xl border border-emerald-100 p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-gradient-to-br from-emerald-50 to-white rounded-xl border border-emerald-100 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
           <div className="flex items-center gap-3">
             <div className="bg-emerald-100 p-2 rounded-lg">
               <BarChartOutlined className="text-emerald-600" />
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">Analytics</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Reporting</h2>
+            <button
+              onClick={() => navigate('/analytics/quizzes')}
+              className="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+            >
+              Go to Analytics <RightOutlined className="text-xs" />
+            </button>
           </div>
 
-          {/* Time Period Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-            >
-              <CalendarOutlined className="text-gray-600" />
-              <span className="text-gray-700 text-sm">{timePeriod}</span>
-              <DownOutlined className="text-gray-500 text-xs" />
-            </button>
-            {showDropdown && (
-              <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                {timePeriods.map((period) => (
-                  <button
-                    key={period}
-                    onClick={() => { setTimePeriod(period); setShowDropdown(false); }}
-                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
-                      timePeriod === period ? 'bg-gray-100 font-medium text-gray-900' : 'text-gray-700'
-                    }`}
-                  >
-                    {period}
-                  </button>
-                ))}
-              </div>
-            )}
+          {/* Time Period + Filters */}
+          <div className="flex items-center gap-2">
+            {/* Filters Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-3 py-2 border rounded-lg hover:bg-gray-50 transition-colors text-sm ${
+                  activeFilterCount > 0
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                    : 'bg-white border-gray-200 text-gray-700'
+                }`}
+              >
+                <FilterOutlined className={activeFilterCount > 0 ? 'text-emerald-600' : 'text-gray-600'} />
+                <span className="hidden sm:inline">Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-600 text-white text-xs font-medium">
+                    {activeFilterCount}
+                  </span>
+                )}
+                <DownOutlined className="text-xs" />
+              </button>
+              {showFilters && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowFilters(false)} />
+                  <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-20 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-semibold text-gray-900">Filters</span>
+                      {activeFilterCount > 0 && (
+                        <button onClick={clearAllFilters} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+                          Clear all
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Attribute</label>
+                        <Select
+                          placeholder="Select attribute"
+                          allowClear
+                          className="w-full"
+                          size="small"
+                          value={analyticsAttrName}
+                          onChange={(v) => { setAnalyticsAttrName(v); setAnalyticsAttrValue(undefined); }}
+                          options={selectAttributes.map((a) => ({ value: a.name, label: a.name }))}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Attribute Value</label>
+                        <Select
+                          placeholder="Select value"
+                          allowClear
+                          className="w-full"
+                          size="small"
+                          value={analyticsAttrValue}
+                          disabled={!analyticsAttrName}
+                          onChange={setAnalyticsAttrValue}
+                          options={(selectedAttr?.options ?? []).map((o) => ({ value: o, label: o }))}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Group</label>
+                        <Select
+                          placeholder="Select group"
+                          allowClear
+                          className="w-full"
+                          size="small"
+                          value={analyticsGroup}
+                          onChange={setAnalyticsGroup}
+                          options={mockGroups.map((g) => ({ value: g.name, label: g.name }))}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Users</label>
+                        <Select
+                          mode="multiple"
+                          placeholder="Select users"
+                          allowClear
+                          className="w-full"
+                          size="small"
+                          value={analyticsUsers}
+                          onChange={setAnalyticsUsers}
+                          options={mockUsers.map((u) => ({ value: u.id, label: u.name }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Time Period Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+              >
+                <CalendarOutlined className="text-gray-600" />
+                <span className="text-gray-700 text-sm">{timePeriod}</span>
+                <DownOutlined className="text-gray-500 text-xs" />
+              </button>
+              {showDropdown && (
+                <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                  {timePeriods.map((period) => (
+                    <button
+                      key={period}
+                      onClick={() => { setTimePeriod(period); setShowDropdown(false); }}
+                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
+                        timePeriod === period ? 'bg-gray-100 font-medium text-gray-900' : 'text-gray-700'
+                      }`}
+                    >
+                      {period}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 sm:mb-6">
+          <button onClick={() => navigate('/analytics/total-users')} className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-blue-700 mb-0.5">Active Users</p>
+                <p className="text-2xl font-semibold text-gray-900">2,847</p>
+                <p className="text-xs text-blue-600 font-medium mt-0.5">+127 this month</p>
+              </div>
+              <div className="bg-blue-100 p-2.5 rounded-lg">
+                <UserOutlined className="text-blue-600 text-lg" />
+              </div>
+            </div>
+          </button>
+          <button onClick={() => navigate('/analytics/active-content')} className="bg-gradient-to-br from-purple-50 to-white rounded-lg border border-purple-100 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-purple-700 mb-0.5">Active Content</p>
+                <p className="text-2xl font-semibold text-gray-900">162</p>
+                <p className="text-xs text-purple-600 font-medium mt-0.5">+8 this month</p>
+              </div>
+              <div className="bg-purple-100 p-2.5 rounded-lg">
+                <FolderOpenOutlined className="text-purple-600 text-lg" />
+              </div>
+            </div>
+          </button>
+          <button onClick={() => navigate('/analytics/completion-rate')} className="bg-gradient-to-br from-amber-50 to-white rounded-lg border border-amber-100 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-amber-700 mb-0.5">Completion Rate</p>
+                <p className="text-2xl font-semibold text-gray-900">78.4%</p>
+                <p className="text-xs text-amber-600 font-medium mt-0.5">+2.3% this week</p>
+              </div>
+              <div className="bg-amber-100 p-2.5 rounded-lg">
+                <RiseOutlined className="text-amber-600 text-lg" />
+              </div>
+            </div>
+          </button>
+        </div>
+
         {/* Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-gray-300">
+        <div className="flex gap-4 mb-4 sm:mb-6 border-b border-gray-300">
           <button
             onClick={() => setActiveTab('quiz')}
-            className={`px-1 pb-3 font-medium text-base transition-colors ${
+            className={`px-1 pb-2 sm:pb-3 font-medium text-sm sm:text-base transition-colors ${
               activeTab === 'quiz'
                 ? 'text-emerald-700 border-b-2 border-emerald-600'
                 : 'text-gray-600 hover:text-gray-900'
@@ -399,7 +584,7 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => setActiveTab('lesson')}
-            className={`px-1 pb-3 font-medium text-base transition-colors ${
+            className={`px-1 pb-2 sm:pb-3 font-medium text-sm sm:text-base transition-colors ${
               activeTab === 'lesson'
                 ? 'text-emerald-700 border-b-2 border-emerald-600'
                 : 'text-gray-600 hover:text-gray-900'
@@ -413,28 +598,29 @@ export default function Dashboard() {
         {activeTab === 'quiz' && (
           <div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {quizStats.map((s) => (
+              {computedQuizStats.map((s) => (
                 <StatCard key={s.label} label={s.label} value={s.value} change={s.change} onClick={() => navigate(s.path)} />
               ))}
             </div>
-            <h3 className="text-base font-semibold text-gray-900 mb-3">Recent Quiz Completions</h3>
-            <div className="space-y-2">
-              {recentQuizzes.map((quiz) => (
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Recent Quiz Completions</h3>
+            <div className="space-y-0 divide-y divide-gray-100">
+              {filteredQuizzes.length === 0 && (
+                <p className="text-xs text-gray-400 text-center py-4">No quiz completions match the selected filters</p>
+              )}
+              {filteredQuizzes.map((quiz) => (
                 <button
                   key={quiz.id}
                   onClick={() => navigate(`/analytics/quizzes/result/${quiz.id}`)}
-                  className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md hover:border-blue-200 transition-all text-left cursor-pointer group"
+                  className="w-full flex items-center gap-3 py-2 px-1 hover:bg-white/60 transition-all text-left cursor-pointer group"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 text-base truncate group-hover:text-blue-600 transition-colors">{quiz.title}</p>
-                    <p className="text-sm text-gray-600">{quiz.user}</p>
+                  <div className="flex-1 min-w-0 flex items-center gap-2">
+                    <p className="text-sm text-gray-900 truncate group-hover:text-blue-600 transition-colors">{quiz.user}</p>
+                    <span className="text-xs text-gray-400 truncate flex-shrink min-w-0">{quiz.title}</span>
                   </div>
-                  <div className="text-right ml-4 flex items-center gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{quiz.score}</p>
-                      <p className="text-sm text-gray-500">{quiz.time}</p>
-                    </div>
-                    <RightOutlined className="text-[10px] text-gray-300 group-hover:text-blue-400 transition-colors" />
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs font-semibold text-gray-900">{quiz.score}</span>
+                    <span className="text-xs text-gray-400">{quiz.time}</span>
+                    <RightOutlined className="text-[9px] text-gray-300 group-hover:text-blue-400 transition-colors hidden sm:block" />
                   </div>
                 </button>
               ))}
@@ -446,19 +632,22 @@ export default function Dashboard() {
         {activeTab === 'lesson' && (
           <div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {lessonStats.map((s) => (
+              {computedLessonStats.map((s) => (
                 <StatCard key={s.label} label={s.label} value={s.value} change={s.change} onClick={() => navigate(s.path)} />
               ))}
             </div>
-            <h3 className="text-base font-semibold text-gray-900 mb-3">Recent Lesson Completions</h3>
-            <div className="space-y-2">
-              {recentLessons.map((lesson) => (
-                <div key={lesson.title} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 text-base truncate">{lesson.title}</p>
-                    <p className="text-sm text-gray-600">{lesson.user}</p>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Recent Lesson Completions</h3>
+            <div className="space-y-0 divide-y divide-gray-100">
+              {filteredLessons.length === 0 && (
+                <p className="text-xs text-gray-400 text-center py-4">No lesson completions match the selected filters</p>
+              )}
+              {filteredLessons.map((lesson) => (
+                <div key={lesson.id} className="flex items-center gap-3 py-2 px-1 hover:bg-white/60 transition-all">
+                  <div className="flex-1 min-w-0 flex items-center gap-2">
+                    <p className="text-sm text-gray-900 truncate">{lesson.user}</p>
+                    <span className="text-xs text-gray-400 truncate flex-shrink min-w-0">{lesson.title}</span>
                   </div>
-                  <span className="text-sm text-gray-500 ml-4">{lesson.time}</span>
+                  <span className="text-xs text-gray-400 flex-shrink-0">{lesson.time}</span>
                 </div>
               ))}
             </div>
