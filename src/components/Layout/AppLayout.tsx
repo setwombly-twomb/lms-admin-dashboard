@@ -144,7 +144,6 @@ export default function AppLayout() {
   const [notifications, setNotifications] = useState(initialNotifications);
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchHighlight, setSearchHighlight] = useState(0);
   const [recentSearches, setRecentSearches] = useState<SearchItem[]>([
@@ -190,7 +189,6 @@ export default function AppLayout() {
         setNotifOpen(false);
       }
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setSearchOpen(false);
         setSearchFocused(false);
       }
     };
@@ -204,11 +202,9 @@ export default function AppLayout() {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setSearchFocused(true);
-        setSearchOpen(true);
         setTimeout(() => searchInputRef.current?.focus(), 50);
       }
       if (e.key === 'Escape') {
-        setSearchOpen(false);
         setSearchFocused(false);
         setSearchQuery('');
         searchInputRef.current?.blur();
@@ -222,7 +218,6 @@ export default function AppLayout() {
     setRecentSearches((prev) => [item, ...prev.filter((r) => r.id !== item.id)].slice(0, 5));
     navigate(item.path);
     setSearchQuery('');
-    setSearchOpen(false);
     setSearchFocused(false);
     setSearchHighlight(0);
     searchInputRef.current?.blur();
@@ -332,7 +327,7 @@ export default function AppLayout() {
             {!searchFocused && (
               <div className="flex-1 max-w-xl mx-4 relative hidden md:block">
                 <button
-                  onClick={() => { setSearchFocused(true); setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
+                  onClick={() => { setSearchFocused(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
                   className="w-full flex items-center gap-2 pl-3 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-400 hover:bg-gray-100 hover:border-gray-300 transition-colors text-left"
                 >
                   <SearchOutlined className="text-sm" />
@@ -379,7 +374,7 @@ export default function AppLayout() {
         {/* Search Focus Mode Overlay */}
         {searchFocused && (
           <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh]">
-            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={() => { setSearchFocused(false); setSearchOpen(false); setSearchQuery(''); }} />
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={() => { setSearchFocused(false); setSearchQuery(''); }} />
             <div className="relative w-full max-w-2xl mx-4 animate-[slideUp_0.2s_ease-out]" ref={searchRef}>
               {/* Search input */}
               <div className="relative">
@@ -388,14 +383,14 @@ export default function AppLayout() {
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); setSearchHighlight(0); }}
+                  onChange={(e) => { setSearchQuery(e.target.value); setSearchHighlight(0); }}
                   onKeyDown={handleSearchKeyDown}
                   placeholder="Search across everything..."
                   autoFocus
                   className="w-full pl-12 pr-12 py-4 bg-white border border-gray-200 rounded-t-2xl text-base text-gray-900 placeholder-gray-400 focus:outline-none shadow-2xl"
                 />
                 <button
-                  onClick={() => { setSearchFocused(false); setSearchOpen(false); setSearchQuery(''); }}
+                  onClick={() => { setSearchFocused(false); setSearchQuery(''); }}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600 px-2 py-1 bg-gray-100 rounded-md transition-colors"
                 >
                   ESC
