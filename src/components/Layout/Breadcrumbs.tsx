@@ -9,8 +9,17 @@ const nameMap: Record<string, string> = {
   '/groups': 'Groups',
   '/attributes': 'Attributes',
   '/analytics': 'Analytics',
+  '/analytics/total-users': 'Total Users',
+  '/analytics/active-content': 'Active Content',
+  '/analytics/completion-rate': 'Completion Rate',
   '/analytics/quizzes': 'Quizzes',
+  '/analytics/quizzes/completions': 'Completions',
+  '/analytics/quizzes/scores': 'Scores',
+  '/analytics/quizzes/pass-rate': 'Pass Rate',
   '/analytics/lessons': 'Lessons',
+  '/analytics/lessons/in-progress': 'In Progress',
+  '/analytics/lessons/completed': 'Completed',
+  '/analytics/lessons/progress': 'Progress',
 };
 
 export default function Breadcrumbs() {

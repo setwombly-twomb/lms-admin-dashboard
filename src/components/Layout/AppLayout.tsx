@@ -170,11 +170,18 @@ export default function AppLayout() {
               {notifications.length > 0 && !notifOpen && (
                 <button
                   onClick={() => setNotifOpen(true)}
-                  className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors text-left max-w-md"
+                  className={`hidden md:flex items-center gap-2.5 px-4 py-2 rounded-full text-left max-w-lg border shadow-sm hover:shadow-md hover:-translate-y-px active:translate-y-0 transition-all cursor-pointer ${
+                    notifications[0].type === 'grading'
+                      ? 'bg-gradient-to-r from-orange-50 to-white border-orange-200 hover:border-orange-300'
+                      : notifications[0].type === 'deadline'
+                      ? 'bg-gradient-to-r from-red-50 to-white border-red-200 hover:border-red-300'
+                      : 'bg-gradient-to-r from-amber-50 to-white border-amber-200 hover:border-amber-300'
+                  }`}
                 >
-                  <span className="flex-shrink-0">{notifIcons[notifications[0].type]}</span>
-                  <span className="text-sm text-gray-700 truncate">{notifications[0].message}</span>
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center">{notifIcons[notifications[0].type]}</span>
+                  <span className="text-sm font-medium text-gray-800 truncate">{notifications[0].message}</span>
                   <span className="text-xs text-gray-400 flex-shrink-0">{notifications[0].time}</span>
+                  <RightOutlined className="text-[10px] text-gray-400 flex-shrink-0" />
                 </button>
               )}
               <Badge count={notifications.length} size="small" offset={[-2, 2]}>
@@ -189,45 +196,70 @@ export default function AppLayout() {
           </div>
         </div>
 
-        {/* Notifications dropdown — floats below header */}
+        {/* Notifications slide-in overlay */}
         {notifOpen && (
-          <div className="relative">
-            <div className="absolute right-6 top-0 z-50 w-96 bg-white border border-gray-200 rounded-b-xl shadow-xl">
-              <div className="px-6 py-3 border-b border-gray-100 flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-900">Notifications</span>
-                {notifications.length > 0 && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setNotifOpen(false)} />
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 animate-[slideUp_0.25s_ease-out]">
+              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                    <BellOutlined className="text-gray-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-900">Notifications</h3>
+                    <p className="text-xs text-gray-500">{notifications.length} pending</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {notifications.length > 0 && (
+                    <button
+                      onClick={() => setNotifications([])}
+                      className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      Dismiss all
+                    </button>
+                  )}
                   <button
-                    onClick={() => setNotifications([])}
-                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                    onClick={() => setNotifOpen(false)}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
                   >
-                    Dismiss all
+                    ✕
                   </button>
-                )}
+                </div>
               </div>
-              <div className="max-h-80 overflow-y-auto">
+              <div className="max-h-[60vh] overflow-y-auto">
                 {notifications.length === 0 ? (
-                  <div className="px-6 py-8 text-center text-sm text-gray-400">All caught up!</div>
+                  <div className="px-6 py-12 text-center">
+                    <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
+                      <CheckOutlined className="text-green-500 text-lg" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-900">All caught up!</p>
+                    <p className="text-xs text-gray-500 mt-1">No pending notifications</p>
+                  </div>
                 ) : (
                   notifications.map((n) => (
                     <div
                       key={n.id}
-                      className={`border-l-4 px-6 py-3 border-b border-gray-50 ${notifColors[n.type]} transition-all`}
+                      className={`border-l-4 px-6 py-4 border-b border-gray-50 ${notifColors[n.type]} transition-all hover:brightness-95`}
                     >
-                      <div className="flex items-start gap-2.5">
-                        <div className="mt-0.5">{notifIcons[n.type]}</div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                          {notifIcons[n.type]}
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900">{n.message}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">{n.detail}</p>
-                          <div className="flex items-center gap-3 mt-2">
+                          <p className="text-sm font-semibold text-gray-900">{n.message}</p>
+                          <p className="text-xs text-gray-500 mt-1 leading-relaxed">{n.detail}</p>
+                          <div className="flex items-center gap-3 mt-3">
                             <button
                               onClick={() => { navigate(n.actionPath); setNotifOpen(false); }}
-                              className="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
+                              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
                             >
                               {n.actionLabel} <RightOutlined className="text-[10px]" />
                             </button>
                             <button
                               onClick={() => dismissNotification(n.id)}
-                              className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
+                              className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded-full transition-colors"
                             >
                               <CheckOutlined className="text-[10px]" /> Dismiss
                             </button>

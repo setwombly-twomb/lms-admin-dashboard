@@ -9,6 +9,15 @@ import GroupList from './pages/groups/GroupList';
 import AttributeList from './pages/attributes/AttributeList';
 import QuizAnalytics from './pages/analytics/QuizAnalytics';
 import LessonAnalytics from './pages/analytics/LessonAnalytics';
+import TotalUsers from './pages/analytics/TotalUsers';
+import ActiveContent from './pages/analytics/ActiveContent';
+import CompletionRate from './pages/analytics/CompletionRate';
+import QuizCompletions from './pages/analytics/QuizCompletions';
+import QuizScores from './pages/analytics/QuizScores';
+import QuizPassRate from './pages/analytics/QuizPassRate';
+import LessonsInProgress from './pages/analytics/LessonsInProgress';
+import LessonsCompleted from './pages/analytics/LessonsCompleted';
+import LessonProgress from './pages/analytics/LessonProgress';
 
 const routes: RouteObject[] = [
   {
@@ -22,8 +31,17 @@ const routes: RouteObject[] = [
       { path: 'users/import', element: <BulkImport /> },
       { path: 'groups', element: <GroupList /> },
       { path: 'attributes', element: <AttributeList /> },
+      { path: 'analytics/total-users', element: <TotalUsers /> },
+      { path: 'analytics/active-content', element: <ActiveContent /> },
+      { path: 'analytics/completion-rate', element: <CompletionRate /> },
       { path: 'analytics/quizzes', element: <QuizAnalytics /> },
+      { path: 'analytics/quizzes/completions', element: <QuizCompletions /> },
+      { path: 'analytics/quizzes/scores', element: <QuizScores /> },
+      { path: 'analytics/quizzes/pass-rate', element: <QuizPassRate /> },
       { path: 'analytics/lessons', element: <LessonAnalytics /> },
+      { path: 'analytics/lessons/in-progress', element: <LessonsInProgress /> },
+      { path: 'analytics/lessons/completed', element: <LessonsCompleted /> },
+      { path: 'analytics/lessons/progress', element: <LessonProgress /> },
     ],
   },
 ];
