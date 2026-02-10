@@ -19,6 +19,7 @@ import QuizPassRate from './pages/analytics/QuizPassRate';
 import LessonsInProgress from './pages/analytics/LessonsInProgress';
 import LessonsCompleted from './pages/analytics/LessonsCompleted';
 import LessonProgress from './pages/analytics/LessonProgress';
+import QuizResultDetail from './pages/analytics/QuizResultDetail';
 
 const routes: RouteObject[] = [
   {
@@ -40,6 +41,7 @@ const routes: RouteObject[] = [
       { path: 'analytics/quizzes/completions', element: <QuizCompletions /> },
       { path: 'analytics/quizzes/scores', element: <QuizScores /> },
       { path: 'analytics/quizzes/pass-rate', element: <QuizPassRate /> },
+      { path: 'analytics/quizzes/result/:attemptId', element: <QuizResultDetail /> },
       { path: 'analytics/lessons', element: <LessonAnalytics /> },
       { path: 'analytics/lessons/in-progress', element: <LessonsInProgress /> },
       { path: 'analytics/lessons/completed', element: <LessonsCompleted /> },

@@ -15,6 +15,7 @@ import {
   DownOutlined,
   FormOutlined,
   RobotOutlined,
+  RightOutlined,
   CheckCircleFilled,
   SearchOutlined,
   BookOutlined,
@@ -58,15 +59,29 @@ const lessonStats = [
 ];
 
 const recentQuizzes = [
-  { title: 'JavaScript Fundamentals Quiz', user: 'Emily Chen', score: '92%', time: '1h ago' },
-  { title: 'React Hooks Assessment', user: 'David Wilson', score: '88%', time: '3h ago' },
-  { title: 'CSS Grid & Flexbox Quiz', user: 'Lisa Anderson', score: '95%', time: '4h ago' },
+  { id: 'rq1', title: 'JavaScript Fundamentals Quiz', user: 'Emily Chen', score: '92%', time: '1h ago' },
+  { id: 'rq2', title: 'React Hooks Assessment', user: 'David Wilson', score: '88%', time: '2h ago' },
+  { id: 'rq3', title: 'CSS Grid & Flexbox Quiz', user: 'Lisa Anderson', score: '95%', time: '3h ago' },
+  { id: 'rq4', title: 'TypeScript Basics Quiz', user: 'Mike Davis', score: '76%', time: '4h ago' },
+  { id: 'rq5', title: 'Node.js Essentials', user: 'Sarah Johnson', score: '84%', time: '5h ago' },
+  { id: 'rq6', title: 'React Hooks Assessment', user: 'John Smith', score: '91%', time: '6h ago' },
+  { id: 'rq7', title: 'Git & Version Control Quiz', user: 'Amy Rodriguez', score: '97%', time: '7h ago' },
+  { id: 'rq8', title: 'REST API Design Quiz', user: 'Chris Lee', score: '73%', time: '8h ago' },
+  { id: 'rq9', title: 'JavaScript Fundamentals Quiz', user: 'Rachel Kim', score: '89%', time: '9h ago' },
+  { id: 'rq10', title: 'CSS Grid & Flexbox Quiz', user: 'Tom Martinez', score: '82%', time: '10h ago' },
 ];
 
 const recentLessons = [
-  { title: 'Introduction to React', user: 'John Smith', time: '2h ago' },
-  { title: 'Advanced JavaScript', user: 'Sarah Johnson', time: '3h ago' },
-  { title: 'CSS Fundamentals', user: 'Mike Davis', time: '5h ago' },
+  { title: 'Introduction to React', user: 'John Smith', time: '1h ago' },
+  { title: 'Advanced JavaScript', user: 'Sarah Johnson', time: '2h ago' },
+  { title: 'CSS Fundamentals', user: 'Mike Davis', time: '3h ago' },
+  { title: 'State Management with Redux', user: 'Emily Chen', time: '4h ago' },
+  { title: 'Building REST APIs', user: 'David Wilson', time: '5h ago' },
+  { title: 'TypeScript for Beginners', user: 'Lisa Anderson', time: '6h ago' },
+  { title: 'Responsive Web Design', user: 'Amy Rodriguez', time: '7h ago' },
+  { title: 'Git Workflow Best Practices', user: 'Chris Lee', time: '8h ago' },
+  { title: 'Testing with Jest', user: 'Rachel Kim', time: '9h ago' },
+  { title: 'Docker Fundamentals', user: 'Tom Martinez', time: '10h ago' },
 ];
 
 const timePeriods = ['Today', 'Yesterday', 'Last 7 days', 'Last 14 days', 'Last 30 days'];
@@ -405,16 +420,23 @@ export default function Dashboard() {
             <h3 className="text-base font-semibold text-gray-900 mb-3">Recent Quiz Completions</h3>
             <div className="space-y-2">
               {recentQuizzes.map((quiz) => (
-                <div key={quiz.title} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all">
+                <button
+                  key={quiz.id}
+                  onClick={() => navigate(`/analytics/quizzes/result/${quiz.id}`)}
+                  className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md hover:border-blue-200 transition-all text-left cursor-pointer group"
+                >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 text-base truncate">{quiz.title}</p>
+                    <p className="font-medium text-gray-900 text-base truncate group-hover:text-blue-600 transition-colors">{quiz.title}</p>
                     <p className="text-sm text-gray-600">{quiz.user}</p>
                   </div>
-                  <div className="text-right ml-4">
-                    <p className="text-sm font-semibold text-gray-900">{quiz.score}</p>
-                    <p className="text-sm text-gray-500">{quiz.time}</p>
+                  <div className="text-right ml-4 flex items-center gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{quiz.score}</p>
+                      <p className="text-sm text-gray-500">{quiz.time}</p>
+                    </div>
+                    <RightOutlined className="text-[10px] text-gray-300 group-hover:text-blue-400 transition-colors" />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>

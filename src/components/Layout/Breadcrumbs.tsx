@@ -17,6 +17,7 @@ const nameMap: Record<string, string> = {
   '/analytics/quizzes/completions': 'Completions',
   '/analytics/quizzes/scores': 'Scores',
   '/analytics/quizzes/pass-rate': 'Pass Rate',
+  '/analytics/quizzes/result': 'Result',
   '/analytics/lessons': 'Lessons',
   '/analytics/lessons/in-progress': 'In Progress',
   '/analytics/lessons/completed': 'Completed',
