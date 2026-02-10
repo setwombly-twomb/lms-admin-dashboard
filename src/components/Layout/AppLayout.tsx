@@ -22,7 +22,7 @@ import {
   OrderedListOutlined,
   TagOutlined,
 } from '@ant-design/icons';
-import { Tooltip, Badge } from 'antd';
+import { Tooltip } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Breadcrumbs from './Breadcrumbs';
 
@@ -41,6 +41,12 @@ const initialNotifications: Notification[] = [
   { id: '2', type: 'deadline', message: '8 users have due dates in the next 48 hours', detail: 'John Smith, Sarah Johnson, and 6 others have incomplete lessons', time: '30 min ago', actionLabel: 'View Users', actionPath: '/users' },
   { id: '3', type: 'inactive', message: '3 users have no activity on overdue assignments', detail: 'Mike Davis (5 days), Lisa Anderson (3 days), David Wilson (4 days)', time: '1 hr ago', actionLabel: 'Send Reminder', actionPath: '/users' },
   { id: '4', type: 'grading', message: '2 essay submissions awaiting review', detail: 'Technical Writing course — final project submissions', time: '2 hr ago', actionLabel: 'Review', actionPath: '/courses' },
+  { id: '5', type: 'deadline', message: '12 users approaching course deadlines', detail: 'CSS Mastery, React Fundamentals, and Advanced JavaScript courses', time: '3 hr ago', actionLabel: 'View Details', actionPath: '/users' },
+  { id: '6', type: 'grading', message: '4 new quiz submissions to grade', detail: 'JavaScript Fundamentals Quiz — awaiting manual review', time: '4 hr ago', actionLabel: 'Grade Now', actionPath: '/analytics/quizzes' },
+  { id: '7', type: 'inactive', message: '5 users inactive for over 7 days', detail: 'Alex Thompson, Rachel Green, and 3 others have not logged in', time: '5 hr ago', actionLabel: 'Send Reminder', actionPath: '/users' },
+  { id: '8', type: 'deadline', message: 'Course completion deadline in 24 hours', detail: '15 users need to complete Frontend Development folder', time: '6 hr ago', actionLabel: 'View Users', actionPath: '/courses' },
+  { id: '9', type: 'grading', message: '3 assignments pending review', detail: 'Technical Writing and CSS Mastery final assignments', time: '7 hr ago', actionLabel: 'Review', actionPath: '/courses' },
+  { id: '10', type: 'inactive', message: '2 users have overdue lessons', detail: 'State Management Patterns and Responsive Design Basics', time: '8 hr ago', actionLabel: 'View Lessons', actionPath: '/analytics/lessons' },
 ];
 
 const notifIcons: Record<string, React.ReactNode> = {
@@ -146,6 +152,7 @@ export default function AppLayout() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchHighlight, setSearchHighlight] = useState(0);
+  const [notifScrolled, setNotifScrolled] = useState(false);
   const [recentSearches, setRecentSearches] = useState<SearchItem[]>([
     searchIndex[13], // Advanced JavaScript (course)
     searchIndex[22], // John Smith (user)
@@ -154,6 +161,7 @@ export default function AppLayout() {
     searchIndex[19], // React Hooks Assessment (quiz)
   ]);
   const notifRef = useRef<HTMLDivElement>(null);
+  const notifScrollRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -321,7 +329,7 @@ export default function AppLayout() {
             >
               <MenuOutlined className="text-gray-600" />
             </button>
-            <h1 className="text-xl font-semibold text-gray-900 flex-shrink-0">Ethos Dashboard</h1>
+            <h1 className="text-lg font-semibold text-gray-900 flex-shrink-0">Dashboard</h1>
 
             {/* Global Search — inline bar */}
             {!searchFocused && (
@@ -345,28 +353,21 @@ export default function AppLayout() {
               {notifications.length > 0 && !notifOpen && (
                 <button
                   onClick={() => setNotifOpen(true)}
-                  className={`hidden md:flex items-center gap-2.5 px-4 py-2 rounded-full text-left max-w-lg border shadow-sm hover:shadow-md hover:-translate-y-px active:translate-y-0 transition-all cursor-pointer ${
-                    notifications[0].type === 'grading'
-                      ? 'bg-gradient-to-r from-orange-50 to-white border-orange-200 hover:border-orange-300'
-                      : notifications[0].type === 'deadline'
-                      ? 'bg-gradient-to-r from-red-50 to-white border-red-200 hover:border-red-300'
-                      : 'bg-gradient-to-r from-amber-50 to-white border-amber-200 hover:border-amber-300'
-                  }`}
+                  className="hidden md:flex items-center gap-2.5 px-4 py-2 rounded-full text-left max-w-lg border border-[#37626b]/30 shadow-sm hover:shadow-md hover:-translate-y-px active:translate-y-0 transition-all cursor-pointer bg-gradient-to-r from-[#37626b] to-gray-200"
                 >
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center">{notifIcons[notifications[0].type]}</span>
-                  <span className="text-sm font-medium text-gray-800 truncate">{notifications[0].message}</span>
-                  <span className="text-xs text-gray-400 flex-shrink-0">{notifications[0].time}</span>
-                  <RightOutlined className="text-[10px] text-gray-400 flex-shrink-0" />
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center relative">
+                    <BellOutlined className="text-xs" style={{ color: 'white' }} />
+                    {notifications.length > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                        {notifications.length}
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-sm font-medium text-white truncate">{notifications[0].message}</span>
+                  <span className="text-xs text-gray-600 flex-shrink-0 font-bold">{notifications[0].time}</span>
+                  <RightOutlined className="text-[10px] flex-shrink-0 font-extrabold" style={{ color: '#4b5563' }} />
                 </button>
               )}
-              <Badge count={notifications.length} size="small" offset={[-2, 2]}>
-                <button
-                  onClick={() => setNotifOpen(!notifOpen)}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <BellOutlined className="text-gray-600 text-lg" />
-                </button>
-              </Badge>
             </div>
           </div>
         </div>
@@ -516,7 +517,7 @@ export default function AppLayout() {
         {notifOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setNotifOpen(false)} />
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 animate-[slideUp_0.25s_ease-out]">
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[57rem] mx-4 animate-[slideUp_0.25s_ease-out]">
               <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
@@ -544,47 +545,68 @@ export default function AppLayout() {
                   </button>
                 </div>
               </div>
-              <div className="max-h-[60vh] overflow-y-auto">
-                {notifications.length === 0 ? (
-                  <div className="px-6 py-12 text-center">
-                    <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
-                      <CheckOutlined className="text-green-500 text-lg" />
+              <div className="relative">
+                <div 
+                  ref={notifScrollRef}
+                  className="h-[580px] overflow-y-auto scrollbar-thin"
+                  onScroll={(e) => {
+                    const target = e.currentTarget;
+                    setNotifScrolled(target.scrollTop > 10);
+                  }}
+                >
+                  {notifications.length === 0 ? (
+                    <div className="px-6 py-12 text-center">
+                      <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
+                        <CheckOutlined className="text-green-500 text-lg" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-900">All caught up!</p>
+                      <p className="text-xs text-gray-500 mt-1">No pending notifications</p>
                     </div>
-                    <p className="text-sm font-medium text-gray-900">All caught up!</p>
-                    <p className="text-xs text-gray-500 mt-1">No pending notifications</p>
-                  </div>
-                ) : (
-                  notifications.map((n) => (
-                    <div
-                      key={n.id}
-                      className={`border-l-4 px-6 py-4 border-b border-gray-50 ${notifColors[n.type]} transition-all hover:brightness-95`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">
-                          {notifIcons[n.type]}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900">{n.message}</p>
-                          <p className="text-xs text-gray-500 mt-1 leading-relaxed">{n.detail}</p>
-                          <div className="flex items-center gap-3 mt-3">
-                            <button
-                              onClick={() => { navigate(n.actionPath); setNotifOpen(false); }}
-                              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
-                            >
-                              {n.actionLabel} <RightOutlined className="text-[10px]" />
-                            </button>
-                            <button
-                              onClick={() => dismissNotification(n.id)}
-                              className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded-full transition-colors"
-                            >
-                              <CheckOutlined className="text-[10px]" /> Dismiss
-                            </button>
-                            <span className="text-xs text-gray-400 ml-auto">{n.time}</span>
+                  ) : (
+                    notifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className={`border-l-4 px-6 py-4 border-b border-gray-50 ${notifColors[n.type]} transition-all hover:brightness-95`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                            {notifIcons[n.type]}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900">{n.message}</p>
+                            <p className="text-xs text-gray-500 mt-1 leading-relaxed">{n.detail}</p>
+                            <div className="flex items-center gap-3 mt-3">
+                              <button
+                                onClick={() => { navigate(n.actionPath); setNotifOpen(false); }}
+                                className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
+                              >
+                                {n.actionLabel} <RightOutlined className="text-[10px]" />
+                              </button>
+                              <button
+                                onClick={() => dismissNotification(n.id)}
+                                className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                              >
+                                <CheckOutlined className="text-[10px]" /> Dismiss
+                              </button>
+                              <span className="text-xs text-gray-400 ml-auto">{n.time}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
+                    ))
+                  )}
+                </div>
+                {/* Scroll indicator */}
+                {notifications.length > 5 && !notifScrolled && (
+                  <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none flex items-end justify-center pb-4">
+                    <div className="px-4 py-2 bg-blue-600 text-white rounded-full shadow-lg flex items-center gap-2 animate-bounce">
+                      <BellOutlined className="text-sm" />
+                      <span className="text-sm font-semibold">{notifications.length} notifications</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                      </svg>
                     </div>
-                  ))
+                  </div>
                 )}
               </div>
             </div>

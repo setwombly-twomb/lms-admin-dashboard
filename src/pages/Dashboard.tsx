@@ -312,7 +312,7 @@ export default function Dashboard() {
         <button onClick={() => navigate('/analytics/total-users')} className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-blue-700 mb-0.5">Total Users</p>
+              <p className="text-xs text-blue-700 mb-0.5">Active Users</p>
               <p className="text-2xl font-semibold text-gray-900">2,847</p>
               <p className="text-xs text-blue-600 font-medium mt-0.5">+127 this month</p>
             </div>
