@@ -42,7 +42,7 @@ const userFlows: FlowItem[] = [
 const contentFlows: FlowItem[] = [
   { title: 'Assign Content', icon: UploadOutlined, action: 'assignContent' },
   { title: 'Create Content', icon: FileAddOutlined, action: 'createContent' },
-  { title: 'Export Data', icon: DownloadOutlined, path: '/analytics/quizzes' },
+  { title: 'Export Data', icon: DownloadOutlined, path: '/export' },
 ];
 
 const quizStats = [

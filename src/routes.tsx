@@ -7,6 +7,7 @@ import UserList from './pages/users/UserList';
 import BulkImport from './pages/users/BulkImport';
 import GroupList from './pages/groups/GroupList';
 import AttributeList from './pages/attributes/AttributeList';
+import ExportData from './pages/ExportData';
 import QuizAnalytics from './pages/analytics/QuizAnalytics';
 import LessonAnalytics from './pages/analytics/LessonAnalytics';
 import TotalUsers from './pages/analytics/TotalUsers';
@@ -31,6 +32,7 @@ const routes: RouteObject[] = [
       { path: 'users/import', element: <BulkImport /> },
       { path: 'groups', element: <GroupList /> },
       { path: 'attributes', element: <AttributeList /> },
+      { path: 'export', element: <ExportData /> },
       { path: 'analytics/total-users', element: <TotalUsers /> },
       { path: 'analytics/active-content', element: <ActiveContent /> },
       { path: 'analytics/completion-rate', element: <CompletionRate /> },

@@ -8,6 +8,7 @@ const nameMap: Record<string, string> = {
   '/users/import': 'Bulk Import',
   '/groups': 'Groups',
   '/attributes': 'Attributes',
+  '/export': 'Export Data',
   '/analytics': 'Analytics',
   '/analytics/total-users': 'Total Users',
   '/analytics/active-content': 'Active Content',
