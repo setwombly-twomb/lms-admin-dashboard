@@ -48,6 +48,7 @@ const userFlows: FlowItem[] = [
 const contentFlows: FlowItem[] = [
   { title: 'Assign Content', icon: UploadOutlined, action: 'assignContent' },
   { title: 'Create Content', icon: FileAddOutlined, action: 'createContent' },
+  { title: 'Manage Libraries', icon: BookOutlined, path: '/libraries' },
   { title: 'Export Data', icon: DownloadOutlined, path: '/export' },
 ];
 
@@ -368,14 +369,14 @@ export default function Dashboard() {
         </div>
 
         {/* Content Management */}
-        <div className="rounded-lg border border-purple-100 bg-gradient-to-br from-purple-50/60 to-white p-3 w-full md:w-[380px]">
+        <div className="rounded-lg border border-purple-100 bg-gradient-to-br from-purple-50/60 to-white p-3 w-full md:w-[500px]">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded bg-purple-100 flex items-center justify-center">
               <FolderOpenOutlined className="text-purple-600 text-xs" />
             </div>
             <h3 className="text-sm font-semibold text-gray-900">Content Management</h3>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {contentFlows.map((flow) => {
               const Icon = flow.icon;
               return (
