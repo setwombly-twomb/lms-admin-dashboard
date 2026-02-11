@@ -31,12 +31,10 @@ import {
   FilterOutlined,
   PlusOutlined,
   CheckOutlined,
-  EllipsisOutlined,
   EditOutlined,
   ClockCircleOutlined,
   WarningOutlined,
   BellOutlined,
-  HistoryOutlined,
   InfoCircleOutlined,
   CloseOutlined,
 } from '@ant-design/icons';
@@ -110,20 +108,6 @@ const recentActivities: RecentActivity[] = [
   { id: 'ra5', type: 'editing', title: 'Creating "TypeScript Advanced Patterns"', detail: 'Course — 2 of 6 lessons added', time: '5 hr ago', path: '/courses' },
   { id: 'ra6', type: 'analytics', title: 'Viewing Lesson Progress', detail: 'Reviewing completion rates for New Hires', time: 'Yesterday', path: '/analytics/lessons' },
 ];
-
-const activityIcons: Record<RecentActivityType, React.ReactNode> = {
-  editing: <FileAddOutlined className="text-purple-500" />,
-  analytics: <BarChartOutlined className="text-emerald-500" />,
-  assigning: <CheckOutlined className="text-blue-500" />,
-  users: <UserOutlined className="text-green-500" />,
-};
-
-const activityColors: Record<RecentActivityType, string> = {
-  editing: 'border-l-purple-400 bg-purple-50/50',
-  analytics: 'border-l-emerald-400 bg-emerald-50/50',
-  assigning: 'border-l-blue-400 bg-blue-50/50',
-  users: 'border-l-green-400 bg-green-50/50',
-};
 
 const selectAttributes = mockAttributes.filter((a) => a.type === 'Select' && a.appliedTo === 'User');
 

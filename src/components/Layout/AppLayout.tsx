@@ -7,7 +7,6 @@ import {
   MenuOutlined,
   InfoCircleOutlined,
   DatabaseOutlined,
-  RightOutlined,
   SearchOutlined,
   TeamOutlined,
   FileTextOutlined,

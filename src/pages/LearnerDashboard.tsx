@@ -25,14 +25,6 @@ const typeIcons: Record<LearnerAssignment['type'], React.ReactNode> = {
   tasklist: <OrderedListOutlined className="text-blue-600" />,
 };
 
-const typeLabels: Record<LearnerAssignment['type'], string> = {
-  folder: 'Folder',
-  course: 'Course',
-  lesson: 'Lesson',
-  quiz: 'Quiz',
-  tasklist: 'Tasklist',
-};
-
 interface AssignmentNode {
   item: LearnerAssignment;
   children: AssignmentNode[];
