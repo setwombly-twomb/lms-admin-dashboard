@@ -7,12 +7,7 @@ import {
   MenuOutlined,
   InfoCircleOutlined,
   DatabaseOutlined,
-  BellOutlined,
-  EditOutlined,
-  ClockCircleOutlined,
-  WarningOutlined,
   RightOutlined,
-  CheckOutlined,
   SearchOutlined,
   TeamOutlined,
   FileTextOutlined,
@@ -21,48 +16,15 @@ import {
   BookOutlined,
   OrderedListOutlined,
   TagOutlined,
+  ReadOutlined,
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Breadcrumbs from './Breadcrumbs';
 
-interface Notification {
-  id: string;
-  type: 'grading' | 'deadline' | 'inactive';
-  message: string;
-  detail: string;
-  time: string;
-  actionLabel: string;
-  actionPath: string;
-}
-
-const initialNotifications: Notification[] = [
-  { id: '1', type: 'grading', message: '5 quizzes need manual grading', detail: 'React Hooks Assessment — 3 submissions, CSS Grid Quiz — 2 submissions', time: '10 min ago', actionLabel: 'Review', actionPath: '/analytics/quizzes' },
-  { id: '2', type: 'deadline', message: '8 users have due dates in the next 48 hours', detail: 'John Smith, Sarah Johnson, and 6 others have incomplete lessons', time: '30 min ago', actionLabel: 'View Users', actionPath: '/users' },
-  { id: '3', type: 'inactive', message: '3 users have no activity on overdue assignments', detail: 'Mike Davis (5 days), Lisa Anderson (3 days), David Wilson (4 days)', time: '1 hr ago', actionLabel: 'Send Reminder', actionPath: '/users' },
-  { id: '4', type: 'grading', message: '2 essay submissions awaiting review', detail: 'Technical Writing course — final project submissions', time: '2 hr ago', actionLabel: 'Review', actionPath: '/courses' },
-  { id: '5', type: 'deadline', message: '12 users approaching course deadlines', detail: 'CSS Mastery, React Fundamentals, and Advanced JavaScript courses', time: '3 hr ago', actionLabel: 'View Details', actionPath: '/users' },
-  { id: '6', type: 'grading', message: '4 new quiz submissions to grade', detail: 'JavaScript Fundamentals Quiz — awaiting manual review', time: '4 hr ago', actionLabel: 'Grade Now', actionPath: '/analytics/quizzes' },
-  { id: '7', type: 'inactive', message: '5 users inactive for over 7 days', detail: 'Alex Thompson, Rachel Green, and 3 others have not logged in', time: '5 hr ago', actionLabel: 'Send Reminder', actionPath: '/users' },
-  { id: '8', type: 'deadline', message: 'Course completion deadline in 24 hours', detail: '15 users need to complete Frontend Development folder', time: '6 hr ago', actionLabel: 'View Users', actionPath: '/courses' },
-  { id: '9', type: 'grading', message: '3 assignments pending review', detail: 'Technical Writing and CSS Mastery final assignments', time: '7 hr ago', actionLabel: 'Review', actionPath: '/courses' },
-  { id: '10', type: 'inactive', message: '2 users have overdue lessons', detail: 'State Management Patterns and Responsive Design Basics', time: '8 hr ago', actionLabel: 'View Lessons', actionPath: '/analytics/lessons' },
-];
-
-const notifIcons: Record<string, React.ReactNode> = {
-  grading: <EditOutlined className="text-orange-500" />,
-  deadline: <ClockCircleOutlined className="text-red-500" />,
-  inactive: <WarningOutlined className="text-amber-500" />,
-};
-
-const notifColors: Record<string, string> = {
-  grading: 'border-l-orange-400 bg-orange-50/50',
-  deadline: 'border-l-red-400 bg-red-50/50',
-  inactive: 'border-l-amber-400 bg-amber-50/50',
-};
-
 const topNavItems = [
   { key: '/', icon: <AppstoreOutlined className="text-lg" />, label: 'Dashboard' },
+  { key: '/learner', icon: <ReadOutlined className="text-lg" />, label: 'My Learning' },
   { key: '/users', icon: <UserOutlined className="text-lg" />, label: 'Users' },
   { key: '/courses', icon: <SettingOutlined className="text-lg" />, label: 'Courses' },
   { key: '/analytics/quizzes', icon: <BarChartOutlined className="text-lg" />, label: 'Analytics' },
@@ -147,8 +109,6 @@ const searchIndex: SearchItem[] = [
 
 export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [notifications, setNotifications] = useState(initialNotifications);
-  const [notifOpen, setNotifOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchHighlight, setSearchHighlight] = useState(0);
@@ -159,7 +119,6 @@ export default function AppLayout() {
     searchIndex[27], // Engineering Team (group)
     searchIndex[19], // React Hooks Assessment (quiz)
   ]);
-  const notifRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -187,9 +146,6 @@ export default function AppLayout() {
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setNotifOpen(false);
-      }
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setSearchFocused(false);
       }
@@ -341,35 +297,7 @@ export default function AppLayout() {
               </div>
             )}
 
-            {/* Notification bell + preview pill */}
-            <div className="ml-auto flex items-center gap-3" ref={notifRef}>
-              {notifications.length > 0 && !notifOpen && (
-                <button
-                  onClick={() => setNotifOpen(true)}
-                  className="hidden md:flex items-center gap-2.5 px-4 py-2 rounded-full text-left max-w-lg border border-[#37626b]/30 shadow-sm hover:shadow-md hover:-translate-y-px active:translate-y-0 transition-all cursor-pointer bg-gradient-to-r from-[#37626b] to-gray-200"
-                >
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center relative">
-                    <BellOutlined className="text-xs" style={{ color: 'white' }} />
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                      {notifications.length}
-                    </span>
-                  </span>
-                  <span className="text-sm font-medium text-white truncate">{notifications[0].message}</span>
-                  <span className="text-xs text-gray-600 flex-shrink-0 font-bold">{notifications[0].time}</span>
-                  <RightOutlined className="text-[10px] flex-shrink-0 font-extrabold" style={{ color: '#4b5563' }} />
-                </button>
-              )}
-              {/* Mobile bell icon */}
-              <button
-                onClick={() => setNotifOpen(true)}
-                className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors relative"
-              >
-                <BellOutlined className="text-gray-600 text-lg" />
-                {notifications.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                )}
-              </button>
-            </div>
+            <div className="ml-auto" />
           </div>
         </div>
 
@@ -508,85 +436,6 @@ export default function AppLayout() {
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Action Items modal */}
-        {notifOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setNotifOpen(false)} />
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[57rem] mx-4 animate-[slideUp_0.25s_ease-out]">
-              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                    <BellOutlined className="text-gray-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-gray-900">Action Items</h3>
-                    <p className="text-xs text-gray-500">{notifications.length} pending</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  {notifications.length > 0 && (
-                    <button
-                      onClick={() => setNotifications([])}
-                      className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      Dismiss all
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setNotifOpen(false)}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-              <div className="max-h-[70vh] overflow-y-auto">
-                {notifications.length === 0 ? (
-                  <div className="px-6 py-12 text-center">
-                    <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
-                      <CheckOutlined className="text-green-500 text-lg" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-900">All caught up!</p>
-                    <p className="text-xs text-gray-500 mt-1">No pending action items</p>
-                  </div>
-                ) : (
-                  notifications.map((n) => (
-                    <div
-                      key={n.id}
-                      className={`border-l-4 px-6 py-4 border-b border-gray-50 ${notifColors[n.type]} transition-all hover:brightness-95`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">
-                          {notifIcons[n.type]}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900">{n.message}</p>
-                          <p className="text-xs text-gray-500 mt-1 leading-relaxed">{n.detail}</p>
-                          <div className="flex items-center gap-3 mt-3">
-                            <button
-                              onClick={() => { navigate(n.actionPath); setNotifOpen(false); }}
-                              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
-                            >
-                              {n.actionLabel} <RightOutlined className="text-[10px]" />
-                            </button>
-                            <button
-                              onClick={() => setNotifications((prev) => prev.filter((x) => x.id !== n.id))}
-                              className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded-full transition-colors"
-                            >
-                              <CheckOutlined className="text-[10px]" /> Dismiss
-                            </button>
-                            <span className="text-xs text-gray-400 ml-auto">{n.time}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
                 )}
               </div>
             </div>

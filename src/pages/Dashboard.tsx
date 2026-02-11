@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Select } from 'antd';
 import { mockUsers } from '../data/users';
@@ -29,6 +29,16 @@ import {
   LeftOutlined,
   TagOutlined,
   FilterOutlined,
+  PlusOutlined,
+  CheckOutlined,
+  EllipsisOutlined,
+  EditOutlined,
+  ClockCircleOutlined,
+  WarningOutlined,
+  BellOutlined,
+  HistoryOutlined,
+  InfoCircleOutlined,
+  CloseOutlined,
 } from '@ant-design/icons';
 
 interface FlowItem {
@@ -36,22 +46,84 @@ interface FlowItem {
   icon: React.ComponentType<{ className?: string }>;
   path?: string;
   action?: string;
+  style: string;
+  iconClass: string;
+  variant?: 'dashed' | 'outline';
 }
 
-const userFlows: FlowItem[] = [
-  { title: 'Create Users', icon: UserAddOutlined, action: 'createUser' },
-  { title: 'Manage Groups', icon: TeamOutlined, path: '/groups' },
-  { title: 'Manage Attributes', icon: SettingOutlined, path: '/attributes' },
-  { title: 'Bulk Upload', icon: UploadOutlined, action: 'bulkUpload' },
+const quickActions: FlowItem[] = [
+  { title: 'Create Content', icon: PlusOutlined, action: 'createContent', style: 'bg-blue-50 border-blue-200 hover:bg-blue-100', iconClass: 'text-blue-600' },
+  { title: 'Assign Content', icon: CheckOutlined, action: 'assignContent', style: 'bg-blue-50 border-blue-200 hover:bg-blue-100', iconClass: 'text-blue-600' },
+  { title: 'Export Lessons & Quizzes', icon: DownloadOutlined, path: '/export', style: 'bg-blue-50 border-blue-200 hover:bg-blue-100', iconClass: 'text-blue-600' },
+  { title: 'Create User', icon: UserAddOutlined, action: 'createUser', style: 'bg-green-50 border-green-200 hover:bg-green-100', iconClass: 'text-green-600' },
+  { title: 'Manage Groups', icon: TeamOutlined, path: '/groups', style: 'bg-green-50 border-green-200 hover:bg-green-100', iconClass: 'text-green-600' },
+  { title: 'Manage Attributes', icon: SettingOutlined, path: '/attributes', style: 'bg-green-50 border-green-200 hover:bg-green-100', iconClass: 'text-green-600' },
+  { title: 'Bulk Import', icon: UploadOutlined, action: 'bulkUpload', style: 'bg-green-50 border-green-200 hover:bg-green-100', iconClass: 'text-green-600' },
 ];
 
-const contentFlows: FlowItem[] = [
-  { title: 'Assign Content', icon: UploadOutlined, action: 'assignContent' },
-  { title: 'Create Content', icon: FileAddOutlined, action: 'createContent' },
-  { title: 'Manage Libraries', icon: BookOutlined, path: '/libraries' },
-  { title: 'Export Data', icon: DownloadOutlined, path: '/export' },
+interface ActionItem {
+  id: string;
+  type: 'grading' | 'deadline' | 'inactive';
+  message: string;
+  detail: string;
+  time: string;
+  actionLabel: string;
+  actionPath: string;
+}
+
+const initialActionItems: ActionItem[] = [
+  { id: '1', type: 'grading', message: '5 quizzes need manual grading', detail: 'React Hooks Assessment — 3 submissions, CSS Grid Quiz — 2 submissions', time: '10 min ago', actionLabel: 'Review', actionPath: '/analytics/quizzes' },
+  { id: '2', type: 'deadline', message: '8 users have due dates in the next 48 hours', detail: 'John Smith, Sarah Johnson, and 6 others have incomplete lessons', time: '30 min ago', actionLabel: 'View Users', actionPath: '/users' },
+  { id: '3', type: 'inactive', message: '3 users have no activity on overdue assignments', detail: 'Mike Davis (5 days), Lisa Anderson (3 days), David Wilson (4 days)', time: '1 hr ago', actionLabel: 'Send Reminder', actionPath: '/users' },
+  { id: '4', type: 'grading', message: '2 essay submissions awaiting review', detail: 'Technical Writing course — final project submissions', time: '2 hr ago', actionLabel: 'Review', actionPath: '/courses' },
+  { id: '5', type: 'deadline', message: '12 users approaching course deadlines', detail: 'CSS Mastery, React Fundamentals, and Advanced JavaScript courses', time: '3 hr ago', actionLabel: 'View Details', actionPath: '/users' },
 ];
 
+const actionIcons: Record<string, React.ReactNode> = {
+  grading: <EditOutlined className="text-orange-500" />,
+  deadline: <ClockCircleOutlined className="text-red-500" />,
+  inactive: <WarningOutlined className="text-amber-500" />,
+};
+
+const actionColors: Record<string, string> = {
+  grading: 'border-l-orange-400 bg-orange-50/50',
+  deadline: 'border-l-red-400 bg-red-50/50',
+  inactive: 'border-l-amber-400 bg-amber-50/50',
+};
+
+type RecentActivityType = 'editing' | 'analytics' | 'assigning' | 'users';
+
+interface RecentActivity {
+  id: string;
+  type: RecentActivityType;
+  title: string;
+  detail: string;
+  time: string;
+  path: string;
+}
+
+const recentActivities: RecentActivity[] = [
+  { id: 'ra1', type: 'editing', title: 'Editing "React Hooks Assessment"', detail: 'Quiz — 8 of 12 questions drafted', time: '12 min ago', path: '/courses' },
+  { id: 'ra2', type: 'analytics', title: 'Viewing Quiz Performance', detail: 'Filtered by Engineering department', time: '45 min ago', path: '/analytics/quizzes' },
+  { id: 'ra3', type: 'assigning', title: 'Assigning "CSS Mastery" course', detail: '3 of 5 groups selected', time: '2 hr ago', path: '/courses' },
+  { id: 'ra4', type: 'users', title: 'Managing user permissions', detail: 'Updated roles for 4 users in Sales team', time: '3 hr ago', path: '/users' },
+  { id: 'ra5', type: 'editing', title: 'Creating "TypeScript Advanced Patterns"', detail: 'Course — 2 of 6 lessons added', time: '5 hr ago', path: '/courses' },
+  { id: 'ra6', type: 'analytics', title: 'Viewing Lesson Progress', detail: 'Reviewing completion rates for New Hires', time: 'Yesterday', path: '/analytics/lessons' },
+];
+
+const activityIcons: Record<RecentActivityType, React.ReactNode> = {
+  editing: <FileAddOutlined className="text-purple-500" />,
+  analytics: <BarChartOutlined className="text-emerald-500" />,
+  assigning: <CheckOutlined className="text-blue-500" />,
+  users: <UserOutlined className="text-green-500" />,
+};
+
+const activityColors: Record<RecentActivityType, string> = {
+  editing: 'border-l-purple-400 bg-purple-50/50',
+  analytics: 'border-l-emerald-400 bg-emerald-50/50',
+  assigning: 'border-l-blue-400 bg-blue-50/50',
+  users: 'border-l-green-400 bg-green-50/50',
+};
 
 const selectAttributes = mockAttributes.filter((a) => a.type === 'Select' && a.appliedTo === 'User');
 
@@ -192,6 +264,9 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'quiz' | 'lesson'>('quiz');
   const [timePeriod, setTimePeriod] = useState('Last 7 days');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [actionItems, setActionItems] = useState(initialActionItems);
+  const [notifPanelOpen, setNotifPanelOpen] = useState(false);
+  const [notifTab, setNotifTab] = useState<'actions' | 'system' | 'history'>('actions');
   const [createContentOpen, setCreateContentOpen] = useState(false);
   const [createUserOpen, setCreateUserOpen] = useState(false);
   const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
@@ -212,6 +287,11 @@ export default function Dashboard() {
   const [analyticsAttrValue, setAnalyticsAttrValue] = useState<string | undefined>();
   const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.body.style.overflow = notifPanelOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [notifPanelOpen]);
 
   const selectedAttr = selectAttributes.find((a) => a.name === analyticsAttrName);
 
@@ -332,72 +412,127 @@ export default function Dashboard() {
   return (
     <div>
       {/* Hero */}
-      <div className="mb-4 sm:mb-6">
-        <h2 className="text-xl sm:text-3xl font-semibold text-gray-900 mb-1 sm:mb-2">
+      <div className="mb-5 sm:mb-8 text-center">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-5">
           Let's get started, what would you like to do?
         </h2>
-        <p className="text-sm sm:text-base text-gray-600">Manage users, content, and view analytics</p>
+        <div className="flex flex-wrap justify-center gap-2.5">
+          {quickActions.map((flow) => {
+            const Icon = flow.icon;
+            const borderClass = flow.variant === 'dashed'
+              ? 'border-dashed border-gray-400'
+              : flow.variant === 'outline'
+                ? 'border border-gray-300'
+                : `border ${flow.style}`;
+            return (
+              <button
+                key={flow.title}
+                onClick={() => handleFlowClick(flow)}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all text-sm font-medium text-gray-800 ${borderClass} ${flow.style}`}
+              >
+                <Icon className={flow.iconClass} />
+                <span>{flow.title}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Quick Action Cards */}
-      <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-6">
-        {/* User Management */}
-        <div className="rounded-lg border border-blue-100 bg-gradient-to-br from-blue-50/60 to-white p-3 w-full md:w-[500px]">
+      {/* Continue Where You Left Off + Action Items */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 items-stretch">
+        {/* Continue Where You Left Off */}
+        <div className="flex flex-col">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center">
-              <UserOutlined className="text-blue-600 text-xs" />
-            </div>
-            <h3 className="text-sm font-semibold text-gray-900">User Management</h3>
+            <h3 className="text-sm font-semibold text-gray-900">Continue where you left off</h3>
+            <InfoCircleOutlined className="text-gray-400 text-xs" />
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {userFlows.map((flow) => {
-              const Icon = flow.icon;
-              return (
+          <div
+            className="flex-1 rounded-2xl p-5 flex items-center justify-center relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, #a8c5bf 0%, #8fb3ac 20%, #6f918b 45%, #89b0a8 65%, #b5d1cb 85%, #c8ddd8 100%)',
+            }}
+          >
+            {/* Soft glow overlays */}
+            <div className="absolute inset-0 opacity-50" style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(111,145,139,0.6) 0%, transparent 60%)' }} />
+            <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(ellipse at 70% 30%, rgba(168,197,191,0.7) 0%, transparent 50%)' }} />
+            <div className="absolute inset-0 opacity-30" style={{ background: 'radial-gradient(ellipse at 80% 80%, rgba(200,221,216,0.6) 0%, transparent 50%)' }} />
+
+            {/* Activity cards */}
+            <div className="relative z-10 flex flex-col gap-2.5 w-full sm:w-4/5">
+              {recentActivities.slice(0, 3).map((activity) => (
                 <button
-                  key={flow.title}
-                  onClick={() => handleFlowClick(flow)}
-                  className="flex flex-col items-center justify-center gap-1.5 p-2.5 h-[88px] bg-white rounded-lg border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all group text-center"
+                  key={activity.id}
+                  onClick={() => navigate(activity.path)}
+                  className="w-full flex items-center gap-3 bg-white/90 backdrop-blur-sm rounded-xl px-4 py-3 shadow-sm hover:bg-white hover:shadow-md transition-all text-left group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
-                    <Icon className="text-blue-600 text-sm" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{activity.title}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{activity.time}</p>
                   </div>
-                  <span className="text-xs font-medium text-gray-700 group-hover:text-gray-900 leading-tight">{flow.title}</span>
+                  <RightOutlined className="text-xs text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" />
                 </button>
-              );
-            })}
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Content Management */}
-        <div className="rounded-lg border border-purple-100 bg-gradient-to-br from-purple-50/60 to-white p-3 w-full md:w-[500px]">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded bg-purple-100 flex items-center justify-center">
-              <FolderOpenOutlined className="text-purple-600 text-xs" />
+        {/* Action Items */}
+        {actionItems.length > 0 && (
+          <div className="flex flex-col lg:col-span-2">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <BellOutlined className="text-gray-500" />
+                <h3 className="text-sm font-semibold text-gray-900">Action Items</h3>
+                <span className="text-xs text-gray-400">{actionItems.length} pending</span>
+              </div>
+              <button
+                onClick={() => setNotifPanelOpen(true)}
+                className="text-xs text-gray-500 hover:text-gray-700 font-medium transition-colors"
+              >
+                View All
+              </button>
             </div>
-            <h3 className="text-sm font-semibold text-gray-900">Content Management</h3>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {contentFlows.map((flow) => {
-              const Icon = flow.icon;
-              return (
-                <button
-                  key={flow.title}
-                  onClick={() => handleFlowClick(flow)}
-                  className="flex flex-col items-center justify-center gap-1.5 p-2.5 h-[88px] bg-white rounded-lg border border-gray-200 hover:border-purple-200 hover:shadow-md transition-all group text-center"
+            <div className="space-y-1.5 flex-1">
+              {actionItems.slice(0, 4).map((item) => (
+                <div
+                  key={item.id}
+                  className={`border-l-4 rounded-lg px-4 py-2.5 min-h-[72px] ${actionColors[item.type]} transition-all`}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-purple-50 group-hover:bg-purple-100 flex items-center justify-center transition-colors">
-                    <Icon className="text-purple-600 text-sm" />
+                  <div className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {actionIcons[item.type]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900">{item.message}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{item.detail}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                      <span className="text-xs text-gray-400">{item.time}</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => navigate(item.actionPath)}
+                          className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 px-2.5 py-1 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
+                        >
+                          {item.actionLabel} <RightOutlined className="text-[9px]" />
+                        </button>
+                        <button
+                          onClick={() => setActionItems((prev) => prev.filter((x) => x.id !== item.id))}
+                          className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 px-2.5 py-1 hover:bg-gray-100 rounded-full transition-colors"
+                        >
+                          <CheckOutlined className="text-[9px]" /> Dismiss
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-xs font-medium text-gray-700 group-hover:text-gray-900 leading-tight">{flow.title}</span>
-                </button>
-              );
-            })}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Analytics — Full Width */}
-      <div className="bg-gradient-to-br from-emerald-50 to-white rounded-xl border border-emerald-100 p-4 sm:p-6">
+      <div className="rounded-xl border border-gray-200 p-4 sm:p-6" style={{ backgroundColor: '#FBF9F7' }}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
           <div className="flex items-center gap-3">
             <div className="bg-emerald-100 p-2 rounded-lg">
@@ -533,27 +668,27 @@ export default function Dashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 sm:mb-6">
-          <button onClick={() => navigate('/analytics/total-users')} className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
+          <button onClick={() => navigate('/analytics/total-users')} className="bg-gradient-to-br from-green-50 to-white rounded-lg border border-green-200 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-blue-700 mb-0.5">Active Users</p>
+                <p className="text-xs text-green-700 mb-0.5">Active Users</p>
                 <p className="text-2xl font-semibold text-gray-900">2,847</p>
-                <p className="text-xs text-blue-600 font-medium mt-0.5">+127 this month</p>
+                <p className="text-xs text-green-600 font-medium mt-0.5">+127 this month</p>
               </div>
-              <div className="bg-blue-100 p-2.5 rounded-lg">
-                <UserOutlined className="text-blue-600 text-lg" />
+              <div className="bg-green-100 p-2.5 rounded-lg">
+                <UserOutlined className="text-green-600 text-lg" />
               </div>
             </div>
           </button>
-          <button onClick={() => navigate('/analytics/active-content')} className="bg-gradient-to-br from-purple-50 to-white rounded-lg border border-purple-100 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
+          <button onClick={() => navigate('/analytics/active-content')} className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-200 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-purple-700 mb-0.5">Active Content</p>
+                <p className="text-xs text-blue-700 mb-0.5">Active Content</p>
                 <p className="text-2xl font-semibold text-gray-900">162</p>
-                <p className="text-xs text-purple-600 font-medium mt-0.5">+8 this month</p>
+                <p className="text-xs text-blue-600 font-medium mt-0.5">+8 this month</p>
               </div>
-              <div className="bg-purple-100 p-2.5 rounded-lg">
-                <FolderOpenOutlined className="text-purple-600 text-lg" />
+              <div className="bg-blue-100 p-2.5 rounded-lg">
+                <FolderOpenOutlined className="text-blue-600 text-lg" />
               </div>
             </div>
           </button>
@@ -1030,6 +1165,116 @@ export default function Dashboard() {
               >
                 Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notifications Slide-Out Panel */}
+      {notifPanelOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="fixed inset-0 bg-black/30" onClick={() => setNotifPanelOpen(false)} />
+          <div className="relative w-full max-w-md bg-white shadow-2xl animate-[slideInRight_0.25s_ease-out] flex flex-col h-full">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-gray-100">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <BellOutlined className="text-gray-600 text-lg" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                    <p className="text-xs text-gray-500">{actionItems.length} actions pending</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setActionItems([])}
+                    className="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
+                  >
+                    Dismiss all
+                  </button>
+                  <button
+                    onClick={() => setNotifPanelOpen(false)}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+                  >
+                    <CloseOutlined />
+                  </button>
+                </div>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex gap-6 mt-4 border-b border-gray-200 -mb-[1px]">
+                {(['actions', 'system', 'history'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setNotifTab(tab)}
+                    className={`pb-2.5 text-sm font-medium transition-colors ${
+                      notifTab === tab
+                        ? 'text-gray-900 border-b-2 border-gray-900'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {tab === 'actions' ? 'Actions to take' : tab === 'system' ? 'System' : 'History'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
+              {notifTab === 'actions' && (
+                <>
+                  {actionItems.length === 0 ? (
+                    <div className="px-6 py-16 text-center">
+                      <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
+                        <CheckOutlined className="text-green-500 text-lg" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-900">All caught up!</p>
+                      <p className="text-xs text-gray-500 mt-1">No pending action items</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-100">
+                      {actionItems.map((item) => (
+                        <div key={item.id} className="px-6 py-5">
+                          <div className="flex items-start gap-4">
+                            <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              {actionIcons[item.type]}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-gray-900">{item.message}</p>
+                              <p className="text-sm text-gray-500 mt-1 leading-relaxed">{item.detail}</p>
+                              <div className="flex items-center gap-4 mt-3">
+                                <button
+                                  onClick={() => { navigate(item.actionPath); setNotifPanelOpen(false); }}
+                                  className="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
+                                >
+                                  {item.actionLabel} <RightOutlined className="text-[10px]" />
+                                </button>
+                                <button
+                                  onClick={() => setActionItems((prev) => prev.filter((x) => x.id !== item.id))}
+                                  className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1.5 transition-colors"
+                                >
+                                  <CheckOutlined className="text-[11px]" /> Dismiss
+                                </button>
+                                <span className="text-sm text-gray-400 ml-auto">{item.time}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+              {notifTab === 'system' && (
+                <div className="px-6 py-16 text-center">
+                  <p className="text-sm text-gray-400">No system notifications</p>
+                </div>
+              )}
+              {notifTab === 'history' && (
+                <div className="px-6 py-16 text-center">
+                  <p className="text-sm text-gray-400">No history yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

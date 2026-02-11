@@ -20,6 +20,7 @@ import LessonsInProgress from './pages/analytics/LessonsInProgress';
 import LessonsCompleted from './pages/analytics/LessonsCompleted';
 import LessonProgress from './pages/analytics/LessonProgress';
 import QuizResultDetail from './pages/analytics/QuizResultDetail';
+import LearnerDashboard from './pages/LearnerDashboard';
 
 const routes: RouteObject[] = [
   {
@@ -27,6 +28,7 @@ const routes: RouteObject[] = [
     element: <AppLayout />,
     children: [
       { index: true, element: <Dashboard /> },
+      { path: 'learner', element: <LearnerDashboard /> },
       { path: 'courses', element: <CourseList /> },
       { path: 'courses/assign', element: <CourseAssign /> },
       { path: 'users', element: <UserList /> },

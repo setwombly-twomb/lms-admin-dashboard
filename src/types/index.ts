@@ -112,3 +112,15 @@ export interface ValidationError {
   field: string;
   message: string;
 }
+
+export interface LearnerAssignment {
+  id: string;
+  title: string;
+  type: 'folder' | 'course' | 'lesson' | 'quiz' | 'tasklist';
+  courseName: string;
+  status: 'in_progress' | 'not_started' | 'completed';
+  progress: number;
+  assignedDate: string;
+  dueDate: string | null;
+  estimatedMinutes: number;
+}
