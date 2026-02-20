@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button, Space, Popconfirm, message, Tag } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 import DataTable from '../../components/common/DataTable';
 import PageHeader from '../../components/common/PageHeader';
 import GroupForm from './GroupForm';
@@ -38,7 +39,7 @@ export default function GroupList() {
   };
 
   const columns = [
-    { title: 'Name', dataIndex: 'name', key: 'name', sorter: (a: Group, b: Group) => a.name.localeCompare(b.name) },
+    { title: 'Name', dataIndex: 'name', key: 'name', sorter: (a: Group, b: Group) => a.name.localeCompare(b.name), render: (name: string, record: Group) => <Link to={`/groups/${record.id}`} className="text-blue-600 hover:text-blue-800 font-medium">{name}</Link> },
     { title: 'Description', dataIndex: 'description', key: 'description' },
     { title: 'Members', dataIndex: 'memberCount', key: 'memberCount', sorter: (a: Group, b: Group) => a.memberCount - b.memberCount },
     { title: 'Created', dataIndex: 'createdDate', key: 'createdDate' },

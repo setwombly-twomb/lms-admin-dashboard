@@ -6,6 +6,8 @@ import CourseAssign from './pages/courses/CourseAssign';
 import UserList from './pages/users/UserList';
 import BulkImport from './pages/users/BulkImport';
 import GroupList from './pages/groups/GroupList';
+import CohortOverview from './pages/groups/CohortOverview';
+import TierDetail from './pages/groups/TierDetail';
 import AttributeList from './pages/attributes/AttributeList';
 import ExportData from './pages/ExportData';
 import QuizAnalytics from './pages/analytics/QuizAnalytics';
@@ -34,6 +36,8 @@ const routes: RouteObject[] = [
       { path: 'users', element: <UserList /> },
       { path: 'users/import', element: <BulkImport /> },
       { path: 'groups', element: <GroupList /> },
+      { path: 'groups/:groupId', element: <CohortOverview /> },
+      { path: 'groups/:groupId/tier/:tierKey', element: <TierDetail /> },
       { path: 'attributes', element: <AttributeList /> },
       { path: 'export', element: <ExportData /> },
       { path: 'analytics/total-users', element: <TotalUsers /> },

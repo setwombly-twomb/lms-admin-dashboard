@@ -16,6 +16,10 @@ import {
   OrderedListOutlined,
   TagOutlined,
   ReadOutlined,
+  ClockCircleOutlined,
+  RobotOutlined,
+  DownOutlined,
+  RightOutlined,
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
@@ -104,6 +108,31 @@ const searchIndex: SearchItem[] = [
   { id: 's33', label: 'Role Level', category: 'attribute', path: '/attributes', detail: 'Select — applied to Users' },
   { id: 's34', label: 'Location', category: 'attribute', path: '/attributes', detail: 'Text — applied to Users' },
   { id: 's35', label: 'Start Date', category: 'attribute', path: '/attributes', detail: 'Date — applied to Users' },
+  { id: 's36', label: 'Engineering — Cohort Overview', category: 'group', path: '/groups/1', detail: 'Performance tiers and analytics' },
+  { id: 's37', label: 'Marketing — Cohort Overview', category: 'group', path: '/groups/2', detail: 'Performance tiers and analytics' },
+  { id: 's38', label: 'Sales — Cohort Overview', category: 'group', path: '/groups/3', detail: 'Performance tiers and analytics' },
+  { id: 's39', label: 'Design — Cohort Overview', category: 'group', path: '/groups/4', detail: 'Performance tiers and analytics' },
+  { id: 's40', label: 'Leadership — Cohort Overview', category: 'group', path: '/groups/5', detail: 'Performance tiers and analytics' },
+];
+
+interface RecentlyViewedItem {
+  id: string;
+  title: string;
+  activityType: string;
+  time: string;
+  path: string;
+  iconBg: string;
+  isAvatar?: boolean;
+  avatarText?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  iconColor?: string;
+}
+
+const recentlyViewedData: RecentlyViewedItem[] = [
+  { id: 'rv1', title: 'Getting Started & Login', activityType: 'Viewed Course', time: '10 mins ago', path: '/courses', iconBg: 'bg-blue-100', icon: BookOutlined, iconColor: 'text-blue-600' },
+  { id: 'rv2', title: 'Eva Martinez', activityType: 'Edited User', time: '10 mins ago', path: '/users', iconBg: 'bg-orange-400', isAvatar: true, avatarText: 'EM' },
+  { id: 'rv3', title: 'Welcome to the Platform', activityType: 'Viewed Lesson', time: '10 mins ago', path: '/courses', iconBg: 'bg-indigo-100', icon: FileTextOutlined, iconColor: 'text-indigo-600' },
+  { id: 'rv4', title: 'Create a Lesson from a Document', activityType: 'AI Workflow In Progress', time: '10 mins ago', path: '/courses', iconBg: 'bg-purple-100', icon: RobotOutlined, iconColor: 'text-purple-600' },
 ];
 
 export default function AppLayout() {
@@ -118,8 +147,10 @@ export default function AppLayout() {
     searchIndex[27], // Engineering Team (group)
     searchIndex[19], // React Hooks Assessment (quiz)
   ]);
+  const [recentlyViewedOpen, setRecentlyViewedOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const recentlyViewedRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -147,6 +178,9 @@ export default function AppLayout() {
     const handleClick = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setSearchFocused(false);
+      }
+      if (recentlyViewedRef.current && !recentlyViewedRef.current.contains(e.target as Node)) {
+        setRecentlyViewedOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClick);
@@ -211,7 +245,7 @@ export default function AppLayout() {
         }}
         className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all hover:scale-110 ${
           isActive(item.key)
-            ? 'bg-gray-900 text-white'
+            ? 'bg-lime-100 text-gray-900'
             : 'hover:bg-gray-100 text-gray-700'
         }`}
       >
@@ -234,9 +268,9 @@ export default function AppLayout() {
         {/* Logo */}
         <button
           onClick={() => navigate('/')}
-          className="w-10 h-10 flex items-center justify-center rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-lime-400 hover:bg-lime-500 transition-colors"
         >
-          <div className="w-2 h-2 bg-white rounded-full" />
+          <div className="w-2.5 h-2.5 bg-white rounded-full" />
         </button>
 
         {/* Top nav icons */}
@@ -270,33 +304,88 @@ export default function AppLayout() {
       {/* Main content area */}
       <div className="flex-1 flex flex-col lg:ml-16">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-3">
+        <div className="bg-white border-b border-gray-200 px-4 py-3">
           <div className="flex items-center gap-4">
-            <button
-              className="p-2 hover:bg-gray-100 rounded-lg lg:hidden"
-              onClick={() => setMobileOpen(!mobileOpen)}
-            >
-              <MenuOutlined className="text-gray-600" />
-            </button>
-            <h1 className="text-lg font-semibold text-gray-900 flex-shrink-0">Dashboard</h1>
+            {/* Brand */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                className="p-1.5 hover:bg-gray-100 rounded-lg lg:hidden"
+                onClick={() => setMobileOpen(!mobileOpen)}
+              >
+                <MenuOutlined className="text-gray-600" />
+              </button>
+              <div className="flex items-center gap-2 px-2 py-1.5 bg-gray-900 rounded-md">
+                <MenuOutlined className="text-white text-sm" />
+                <span className="text-white text-sm font-semibold hidden sm:block">Ethos</span>
+              </div>
+              <span className="text-gray-400 text-sm font-medium hidden sm:block">›</span>
+            </div>
 
-            {/* Global Search — inline bar */}
+            {/* Global Search — centered */}
             {!searchFocused && (
-              <div className="flex-1 max-w-xl mx-4 relative hidden md:block">
+              <div className="flex-1 max-w-2xl mx-auto relative hidden md:block">
                 <button
                   onClick={() => { setSearchFocused(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
                   className="w-full flex items-center gap-2 pl-3 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-400 hover:bg-gray-100 hover:border-gray-300 transition-colors text-left"
                 >
                   <SearchOutlined className="text-sm" />
-                  <span className="flex-1">Search users, courses, quizzes, groups...</span>
-                  <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-gray-100 border border-gray-200 rounded text-[10px] text-gray-400 font-medium">
-                    ⌘K
-                  </kbd>
+                  <span className="flex-1">Search anything...</span>
+                  <span className="hidden lg:inline-flex items-center gap-1">
+                    <kbd className="inline-flex items-center px-1.5 py-0.5 bg-gray-100 border border-gray-200 rounded text-[10px] text-gray-400 font-medium">⌘</kbd>
+                    <kbd className="inline-flex items-center px-1.5 py-0.5 bg-gray-100 border border-gray-200 rounded text-[10px] text-gray-400 font-medium">K</kbd>
+                  </span>
                 </button>
               </div>
             )}
 
-            <div className="ml-auto" />
+            {/* Recently Viewed dropdown */}
+            <div className="relative flex-shrink-0" ref={recentlyViewedRef}>
+              <button
+                onClick={() => setRecentlyViewedOpen(!recentlyViewedOpen)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  recentlyViewedOpen ? 'bg-gray-100 text-gray-900' : 'hover:bg-gray-100 text-gray-600'
+                }`}
+              >
+                <ClockCircleOutlined className="text-gray-500" />
+                <span className="hidden sm:block">Recently Viewed</span>
+                <DownOutlined className={`text-[10px] text-gray-400 transition-transform ${recentlyViewedOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {recentlyViewedOpen && (
+                <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl border border-gray-200 shadow-xl z-30 overflow-hidden">
+                  <div className="px-4 py-2.5 border-b border-gray-100">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Recently Viewed</p>
+                  </div>
+                  <div className="divide-y divide-gray-100">
+                    {recentlyViewedData.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => { navigate(item.path); setRecentlyViewedOpen(false); }}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left group"
+                        >
+                          {item.isAvatar ? (
+                            <div className={`w-8 h-8 rounded-full ${item.iconBg} flex items-center justify-center flex-shrink-0`}>
+                              <span className="text-white text-xs font-semibold">{item.avatarText}</span>
+                            </div>
+                          ) : (
+                            <div className={`w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center flex-shrink-0`}>
+                              {Icon && <Icon className={`${item.iconColor} text-sm`} />}
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
+                            <p className="text-xs text-gray-400">{item.activityType} · {item.time}</p>
+                          </div>
+                          <RightOutlined className="text-xs text-gray-300 group-hover:text-gray-500 flex-shrink-0 transition-colors" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

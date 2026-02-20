@@ -124,3 +124,19 @@ export interface LearnerAssignment {
   dueDate: string | null;
   estimatedMinutes: number;
 }
+
+export interface CohortMember {
+  id: string;
+  name: string;
+  email: string;
+  completionPct: number;
+  quizAvgScore: number;
+  lessonsCompleted: number;
+  lessonsTotal: number;
+  lastActiveDate: string;
+  courseBreakdown: {
+    courseName: string;
+    completion: number;
+    quizScore: number | null;
+  }[];
+}

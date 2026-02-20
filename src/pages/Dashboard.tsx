@@ -5,12 +5,9 @@ import { mockUsers } from '../data/users';
 import { mockGroups } from '../data/groups';
 import { mockAttributes } from '../data/attributes';
 import {
-  UserAddOutlined,
   TeamOutlined,
-  SettingOutlined,
   UploadOutlined,
   FileAddOutlined,
-  DownloadOutlined,
   UserOutlined,
   FolderOpenOutlined,
   BarChartOutlined,
@@ -21,6 +18,8 @@ import {
   RobotOutlined,
   RightOutlined,
   CheckCircleFilled,
+  CheckCircleOutlined,
+  ContactsOutlined,
   SearchOutlined,
   BookOutlined,
   OrderedListOutlined,
@@ -35,29 +34,10 @@ import {
   ClockCircleOutlined,
   WarningOutlined,
   BellOutlined,
-  InfoCircleOutlined,
   CloseOutlined,
+  EllipsisOutlined,
 } from '@ant-design/icons';
 
-interface FlowItem {
-  title: string;
-  icon: React.ComponentType<{ className?: string }>;
-  path?: string;
-  action?: string;
-  style: string;
-  iconClass: string;
-  variant?: 'dashed' | 'outline';
-}
-
-const quickActions: FlowItem[] = [
-  { title: 'Create Content', icon: PlusOutlined, action: 'createContent', style: 'bg-blue-50 border-blue-200 hover:bg-blue-100', iconClass: 'text-blue-600' },
-  { title: 'Assign Content', icon: CheckOutlined, action: 'assignContent', style: 'bg-blue-50 border-blue-200 hover:bg-blue-100', iconClass: 'text-blue-600' },
-  { title: 'Export Lessons & Quizzes', icon: DownloadOutlined, path: '/export', style: 'bg-blue-50 border-blue-200 hover:bg-blue-100', iconClass: 'text-blue-600' },
-  { title: 'Create User', icon: UserAddOutlined, action: 'createUser', style: 'bg-green-50 border-green-200 hover:bg-green-100', iconClass: 'text-green-600' },
-  { title: 'Manage Groups', icon: TeamOutlined, path: '/groups', style: 'bg-green-50 border-green-200 hover:bg-green-100', iconClass: 'text-green-600' },
-  { title: 'Manage Attributes', icon: SettingOutlined, path: '/attributes', style: 'bg-green-50 border-green-200 hover:bg-green-100', iconClass: 'text-green-600' },
-  { title: 'Bulk Import', icon: UploadOutlined, action: 'bulkUpload', style: 'bg-green-50 border-green-200 hover:bg-green-100', iconClass: 'text-green-600' },
-];
 
 interface ActionItem {
   id: string;
@@ -70,44 +50,25 @@ interface ActionItem {
 }
 
 const initialActionItems: ActionItem[] = [
-  { id: '1', type: 'grading', message: '5 quizzes need manual grading', detail: 'React Hooks Assessment — 3 submissions, CSS Grid Quiz — 2 submissions', time: '10 min ago', actionLabel: 'Review', actionPath: '/analytics/quizzes' },
-  { id: '2', type: 'deadline', message: '8 users have due dates in the next 48 hours', detail: 'John Smith, Sarah Johnson, and 6 others have incomplete lessons', time: '30 min ago', actionLabel: 'View Users', actionPath: '/users' },
-  { id: '3', type: 'inactive', message: '3 users have no activity on overdue assignments', detail: 'Mike Davis (5 days), Lisa Anderson (3 days), David Wilson (4 days)', time: '1 hr ago', actionLabel: 'Send Reminder', actionPath: '/users' },
-  { id: '4', type: 'grading', message: '2 essay submissions awaiting review', detail: 'Technical Writing course — final project submissions', time: '2 hr ago', actionLabel: 'Review', actionPath: '/courses' },
-  { id: '5', type: 'deadline', message: '12 users approaching course deadlines', detail: 'CSS Mastery, React Fundamentals, and Advanced JavaScript courses', time: '3 hr ago', actionLabel: 'View Details', actionPath: '/users' },
+  { id: '1', type: 'grading', message: '5 Quizzes to be graded', detail: 'Analytics Quiz - 3, CSS Grid - 2', time: '', actionLabel: 'Review', actionPath: '/analytics/quizzes' },
+  { id: '2', type: 'deadline', message: '8 Users have overdue dates this week', detail: 'Ashley Carter, Randy Duran, Marie Kellog...', time: '', actionLabel: 'Review', actionPath: '/users' },
+  { id: '3', type: 'inactive', message: '3 Users with no activity on overdue items', detail: 'Lisa Anderson, Mike Davis, Carol Davis', time: '', actionLabel: 'Review', actionPath: '/users' },
+  { id: '4', type: 'grading', message: '2 Essay submissions awaiting review', detail: 'Analytics Quiz', time: '', actionLabel: 'Set Reminder', actionPath: '/courses' },
+  { id: '5', type: 'deadline', message: '12 users approaching course deadlines', detail: 'CSS Mastery, React Fundamentals, and Advanced JavaScript courses', time: '', actionLabel: 'View Details', actionPath: '/users' },
 ];
 
 const actionIcons: Record<string, React.ReactNode> = {
-  grading: <EditOutlined className="text-orange-500" />,
-  deadline: <ClockCircleOutlined className="text-red-500" />,
-  inactive: <WarningOutlined className="text-amber-500" />,
+  grading: <EditOutlined className="text-purple-600" />,
+  deadline: <ClockCircleOutlined className="text-amber-600" />,
+  inactive: <WarningOutlined className="text-red-600" />,
 };
 
-const actionColors: Record<string, string> = {
-  grading: 'border-l-orange-400 bg-orange-50/50',
-  deadline: 'border-l-red-400 bg-red-50/50',
-  inactive: 'border-l-amber-400 bg-amber-50/50',
+const actionIconBgs: Record<string, string> = {
+  grading: 'bg-purple-100',
+  deadline: 'bg-amber-100',
+  inactive: 'bg-red-100',
 };
 
-type RecentActivityType = 'editing' | 'analytics' | 'assigning' | 'users';
-
-interface RecentActivity {
-  id: string;
-  type: RecentActivityType;
-  title: string;
-  detail: string;
-  time: string;
-  path: string;
-}
-
-const recentActivities: RecentActivity[] = [
-  { id: 'ra1', type: 'editing', title: 'Editing "React Hooks Assessment"', detail: 'Quiz — 8 of 12 questions drafted', time: '12 min ago', path: '/courses' },
-  { id: 'ra2', type: 'analytics', title: 'Viewing Quiz Performance', detail: 'Filtered by Engineering department', time: '45 min ago', path: '/analytics/quizzes' },
-  { id: 'ra3', type: 'assigning', title: 'Assigning "CSS Mastery" course', detail: '3 of 5 groups selected', time: '2 hr ago', path: '/courses' },
-  { id: 'ra4', type: 'users', title: 'Managing user permissions', detail: 'Updated roles for 4 users in Sales team', time: '3 hr ago', path: '/users' },
-  { id: 'ra5', type: 'editing', title: 'Creating "TypeScript Advanced Patterns"', detail: 'Course — 2 of 6 lessons added', time: '5 hr ago', path: '/courses' },
-  { id: 'ra6', type: 'analytics', title: 'Viewing Lesson Progress', detail: 'Reviewing completion rates for New Hires', time: 'Yesterday', path: '/analytics/lessons' },
-];
 
 const selectAttributes = mockAttributes.filter((a) => a.type === 'Select' && a.appliedTo === 'User');
 
@@ -248,6 +209,8 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'quiz' | 'lesson'>('quiz');
   const [timePeriod, setTimePeriod] = useState('Last 7 days');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [statsTimePeriod, setStatsTimePeriod] = useState('Last 7 days');
+  const [showStatsDropdown, setShowStatsDropdown] = useState(false);
   const [actionItems, setActionItems] = useState(initialActionItems);
   const [notifPanelOpen, setNotifPanelOpen] = useState(false);
   const [notifTab, setNotifTab] = useState<'actions' | 'system' | 'history'>('actions');
@@ -379,140 +342,198 @@ export default function Dashboard() {
     setSelectedAssignees((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   };
 
-  const handleFlowClick = (flow: FlowItem) => {
-    if (flow.action === 'assignContent') {
-      setAssignOpen(true);
-    } else if (flow.action === 'createContent') {
-      setCreateContentOpen(true);
-    } else if (flow.action === 'bulkUpload') {
-      setBulkUploadOpen(true);
-    } else if (flow.action === 'createUser') {
-      setCreateUserOpen(true);
-    } else if (flow.path) {
-      navigate(flow.path);
-    }
-  };
-
   return (
     <div>
       {/* Hero */}
-      <div className="mb-5 sm:mb-8 text-center">
-        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-5">
-          Let's get started, what would you like to do?
-        </h2>
-        <div className="flex flex-wrap justify-center gap-2.5">
-          {quickActions.map((flow) => {
-            const Icon = flow.icon;
-            const borderClass = flow.variant === 'dashed'
-              ? 'border-dashed border-gray-400'
-              : flow.variant === 'outline'
-                ? 'border border-gray-300'
-                : `border ${flow.style}`;
-            return (
-              <button
-                key={flow.title}
-                onClick={() => handleFlowClick(flow)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all text-sm font-medium text-gray-800 ${borderClass} ${flow.style}`}
-              >
-                <Icon className={flow.iconClass} />
-                <span>{flow.title}</span>
-              </button>
-            );
-          })}
+      <div className="mb-6 sm:mb-8 pt-2 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+        <div className="flex-shrink-0">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
+            Welcome to Ethos
+          </h2>
+          <p className="text-sm text-gray-500">Your readiness lives here</p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => setCreateContentOpen(true)}
+            className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-blue-50 border border-blue-100 rounded-2xl shadow-sm hover:bg-blue-100 hover:border-blue-200 transition-colors text-sm font-medium text-gray-700"
+          >
+            <PlusOutlined className="text-blue-500 text-base" />
+            Create Content
+          </button>
+          <button
+            onClick={() => setAssignOpen(true)}
+            className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-cyan-50 border border-cyan-100 rounded-2xl shadow-sm hover:bg-cyan-100 hover:border-cyan-200 transition-colors text-sm font-medium text-gray-700"
+          >
+            <CheckCircleOutlined className="text-cyan-500 text-base" />
+            Assign Content
+          </button>
+          <button
+            onClick={() => setCreateUserOpen(true)}
+            className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-cyan-50 border border-cyan-100 rounded-2xl shadow-sm hover:bg-cyan-100 hover:border-cyan-200 transition-colors text-sm font-medium text-gray-700"
+          >
+            <ContactsOutlined className="text-cyan-500 text-base" />
+            Create Users
+          </button>
+          <button
+            onClick={() => navigate('/groups')}
+            className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-teal-50 border border-teal-100 rounded-2xl shadow-sm hover:bg-teal-100 hover:border-teal-200 transition-colors text-sm font-medium text-gray-700"
+          >
+            <TeamOutlined className="text-teal-500 text-base" />
+            Manage Groups
+          </button>
+          <button className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white border border-gray-200 rounded-2xl shadow-sm hover:bg-gray-50 transition-colors text-sm font-medium text-gray-600">
+            <EllipsisOutlined className="text-gray-400 text-base" />
+            More
+          </button>
         </div>
       </div>
 
-      {/* Continue Where You Left Off + Action Items */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 items-stretch">
-        {/* Continue Where You Left Off */}
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2 mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Continue where you left off</h3>
-            <InfoCircleOutlined className="text-gray-400 text-xs" />
-          </div>
-          <div
-            className="flex-1 rounded-2xl p-5 flex items-center justify-center relative overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, #a8c5bf 0%, #8fb3ac 20%, #6f918b 45%, #89b0a8 65%, #b5d1cb 85%, #c8ddd8 100%)',
-            }}
-          >
-            {/* Soft glow overlays */}
-            <div className="absolute inset-0 opacity-50" style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(111,145,139,0.6) 0%, transparent 60%)' }} />
-            <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(ellipse at 70% 30%, rgba(168,197,191,0.7) 0%, transparent 50%)' }} />
-            <div className="absolute inset-0 opacity-30" style={{ background: 'radial-gradient(ellipse at 80% 80%, rgba(200,221,216,0.6) 0%, transparent 50%)' }} />
-
-            {/* Activity cards */}
-            <div className="relative z-10 flex flex-col gap-2.5 w-full sm:w-4/5">
-              {recentActivities.slice(0, 3).map((activity) => (
-                <button
-                  key={activity.id}
-                  onClick={() => navigate(activity.path)}
-                  className="w-full flex items-center gap-3 bg-white/90 backdrop-blur-sm rounded-xl px-4 py-3 shadow-sm hover:bg-white hover:shadow-md transition-all text-left group"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{activity.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{activity.time}</p>
-                  </div>
-                  <RightOutlined className="text-xs text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" />
-                </button>
-              ))}
-            </div>
+      {/* Overview — full width */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-5">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
+          <h3 className="text-sm font-semibold text-gray-900">Overview</h3>
+          <div className="relative">
+            <button
+              onClick={() => setShowStatsDropdown(!showStatsDropdown)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-xs text-gray-600"
+            >
+              <CalendarOutlined className="text-gray-500 text-xs" />
+              <span>{statsTimePeriod}</span>
+              <DownOutlined className="text-[10px] text-gray-400" />
+            </button>
+            {showStatsDropdown && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowStatsDropdown(false)} />
+                <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                  {timePeriods.map((period) => (
+                    <button
+                      key={period}
+                      onClick={() => { setStatsTimePeriod(period); setShowStatsDropdown(false); }}
+                      className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
+                        statsTimePeriod === period ? 'bg-gray-100 font-medium text-gray-900' : 'text-gray-700'
+                      }`}
+                    >
+                      {period}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
+        <div className="p-3">
 
-        {/* Action Items */}
-        {actionItems.length > 0 && (
-          <div className="flex flex-col lg:col-span-2">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <BellOutlined className="text-gray-500" />
-                <h3 className="text-sm font-semibold text-gray-900">Action Items</h3>
-                <span className="text-xs text-gray-400">{actionItems.length} pending</span>
-              </div>
-              <button
-                onClick={() => setNotifPanelOpen(true)}
-                className="text-xs text-gray-500 hover:text-gray-700 font-medium transition-colors"
-              >
-                View All
-              </button>
-            </div>
-            <div className="space-y-1.5 flex-1">
-              {actionItems.slice(0, 4).map((item) => (
-                <div
-                  key={item.id}
-                  className={`border-l-4 rounded-lg px-4 py-2.5 min-h-[72px] ${actionColors[item.type]} transition-all`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">
-                      {actionIcons[item.type]}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{item.message}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{item.detail}</p>
-                    </div>
-                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                      <span className="text-xs text-gray-400">{item.time}</span>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => navigate(item.actionPath)}
-                          className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 px-2.5 py-1 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
-                        >
-                          {item.actionLabel} <RightOutlined className="text-[9px]" />
-                        </button>
-                        <button
-                          onClick={() => setActionItems((prev) => prev.filter((x) => x.id !== item.id))}
-                          className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 px-2.5 py-1 hover:bg-gray-100 rounded-full transition-colors"
-                        >
-                          <CheckOutlined className="text-[9px]" /> Dismiss
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+          {/* Single row of 4 metric cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            <button onClick={() => navigate('/users')} className="bg-red-50/40 rounded-lg border border-red-100 px-3 py-2.5 hover:shadow-md transition-shadow text-left">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-red-700 mb-0.5">Overdue Training</p>
+                  <p className="text-lg font-semibold text-gray-900">34</p>
+                  <p className="text-xs text-red-600 font-medium mt-0.5">+5 this week</p>
                 </div>
-              ))}
-            </div>
+                <div className="bg-red-100 p-1.5 rounded-lg">
+                  <ClockCircleOutlined className="text-red-600" />
+                </div>
+              </div>
+            </button>
+            <button onClick={() => navigate('/users')} className="bg-amber-50/40 rounded-lg border border-amber-100 px-3 py-2.5 hover:shadow-md transition-shadow text-left">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-amber-700 mb-0.5">At-Risk Learners</p>
+                  <p className="text-lg font-semibold text-gray-900">12</p>
+                  <p className="text-xs text-amber-600 font-medium mt-0.5">+2 this week</p>
+                </div>
+                <div className="bg-amber-100 p-1.5 rounded-lg">
+                  <WarningOutlined className="text-amber-600" />
+                </div>
+              </div>
+            </button>
+            <button onClick={() => navigate('/analytics/completion-rate')} className="bg-emerald-50/40 rounded-lg border border-emerald-100 px-3 py-2.5 hover:shadow-md transition-shadow text-left">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-emerald-700 mb-0.5">Completion Rate</p>
+                  <p className="text-lg font-semibold text-gray-900">78.4%</p>
+                  <p className="text-xs text-emerald-600 font-medium mt-0.5">+2.3% this week</p>
+                </div>
+                <div className="bg-emerald-100 p-1.5 rounded-lg">
+                  <RiseOutlined className="text-emerald-600" />
+                </div>
+              </div>
+            </button>
+            <button onClick={() => navigate('/analytics/quizzes/scores')} className="bg-purple-50/40 rounded-lg border border-purple-100 px-3 py-2.5 hover:shadow-md transition-shadow text-left">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-purple-700 mb-0.5">Avg. Quiz Score</p>
+                  <p className="text-lg font-semibold text-gray-900">84.2%</p>
+                  <p className="text-xs text-purple-600 font-medium mt-0.5">+1.1% this week</p>
+                </div>
+                <div className="bg-purple-100 p-1.5 rounded-lg">
+                  <FormOutlined className="text-purple-600" />
+                </div>
+              </div>
+            </button>
           </div>
-        )}
+
+        </div>
+      </div>
+
+      {/* To-dos — full width */}
+      <div
+        className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6"
+        style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
+      >
+        <div className="flex items-center justify-between px-5 py-4 bg-gray-50 border-b border-gray-200">
+          <div className="flex items-center gap-2.5">
+            <h3 className="text-sm font-semibold text-gray-900">To-dos</h3>
+            {actionItems.length > 0 && (
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] font-bold">
+                {actionItems.length}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => setNotifPanelOpen(true)}
+            className="text-xs text-gray-500 hover:text-gray-700 font-medium transition-colors"
+          >
+            View All
+          </button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+          {actionItems.slice(0, 4).map((item) => (
+            <div key={item.id} className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${actionIconBgs[item.type]}`}>
+                {actionIcons[item.type]}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900">{item.message}</p>
+                <p className="text-xs text-gray-500 mt-0.5 truncate">{item.detail}</p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={() => navigate(item.actionPath)}
+                  className="px-3 py-1 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700"
+                >
+                  {item.actionLabel}
+                </button>
+                <button
+                  onClick={() => setActionItems((prev) => prev.filter((x) => x.id !== item.id))}
+                  className="w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  <CloseOutlined className="text-[10px]" />
+                </button>
+              </div>
+            </div>
+          ))}
+          {actionItems.length === 0 && (
+            <div className="col-span-2 px-5 py-10 text-center">
+              <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-2">
+                <CheckOutlined className="text-green-500" />
+              </div>
+              <p className="text-sm text-gray-500">All caught up!</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Analytics — Full Width */}
@@ -648,46 +669,6 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 sm:mb-6">
-          <button onClick={() => navigate('/analytics/total-users')} className="bg-gradient-to-br from-green-50 to-white rounded-lg border border-green-200 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-green-700 mb-0.5">Active Users</p>
-                <p className="text-2xl font-semibold text-gray-900">2,847</p>
-                <p className="text-xs text-green-600 font-medium mt-0.5">+127 this month</p>
-              </div>
-              <div className="bg-green-100 p-2.5 rounded-lg">
-                <UserOutlined className="text-green-600 text-lg" />
-              </div>
-            </div>
-          </button>
-          <button onClick={() => navigate('/analytics/active-content')} className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-200 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-blue-700 mb-0.5">Active Content</p>
-                <p className="text-2xl font-semibold text-gray-900">162</p>
-                <p className="text-xs text-blue-600 font-medium mt-0.5">+8 this month</p>
-              </div>
-              <div className="bg-blue-100 p-2.5 rounded-lg">
-                <FolderOpenOutlined className="text-blue-600 text-lg" />
-              </div>
-            </div>
-          </button>
-          <button onClick={() => navigate('/analytics/completion-rate')} className="bg-gradient-to-br from-amber-50 to-white rounded-lg border border-amber-100 p-3 hover:shadow-lg transition-shadow text-left cursor-pointer">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-amber-700 mb-0.5">Completion Rate</p>
-                <p className="text-2xl font-semibold text-gray-900">78.4%</p>
-                <p className="text-xs text-amber-600 font-medium mt-0.5">+2.3% this week</p>
-              </div>
-              <div className="bg-amber-100 p-2.5 rounded-lg">
-                <RiseOutlined className="text-amber-600 text-lg" />
-              </div>
-            </div>
-          </button>
         </div>
 
         {/* Tabs */}
@@ -1197,7 +1178,7 @@ export default function Dashboard() {
                         : 'text-gray-500 hover:text-gray-700'
                     }`}
                   >
-                    {tab === 'actions' ? 'Actions to take' : tab === 'system' ? 'System' : 'History'}
+                    {tab === 'actions' ? 'To-dos' : tab === 'system' ? 'System' : 'History'}
                   </button>
                 ))}
               </div>
@@ -1229,15 +1210,15 @@ export default function Dashboard() {
                               <div className="flex items-center gap-4 mt-3">
                                 <button
                                   onClick={() => { navigate(item.actionPath); setNotifPanelOpen(false); }}
-                                  className="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
+                                  className="text-sm font-medium text-gray-700 border border-gray-300 rounded-md px-3 py-1 hover:bg-gray-50 transition-colors"
                                 >
-                                  {item.actionLabel} <RightOutlined className="text-[10px]" />
+                                  {item.actionLabel}
                                 </button>
                                 <button
                                   onClick={() => setActionItems((prev) => prev.filter((x) => x.id !== item.id))}
-                                  className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1.5 transition-colors"
+                                  className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
                                 >
-                                  <CheckOutlined className="text-[11px]" /> Dismiss
+                                  Dismiss
                                 </button>
                                 <span className="text-sm text-gray-400 ml-auto">{item.time}</span>
                               </div>
